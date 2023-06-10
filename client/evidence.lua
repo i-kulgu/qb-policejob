@@ -190,6 +190,34 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
     end)
 end)
 
+RegisterNetEvent('evidence:client:writeEvidenceNot', function(item)
+    local dialog = exports['qb-input']:ShowInput({
+        header = 'Write evidence note', submitText = 'Write',
+        inputs = {{text = 'Note', name = 'evidencebagnote', type = 'text', isRequired = true}}
+    })
+
+    if dialog then
+        if dialog.evidencebagnote and dialog.evidencebagnote ~= '' then
+            TriggerServerEvent('police:server:setEvidenceBagNote', item, dialog.evidencebagnote)
+        end
+    else return end
+end)
+
+AddEventHandler("CEventGunShot", function(witnesses, ped)
+    if PlayerPedId() ~= ped then return end
+    if witnesses[1] ~= ped then return end
+    local weapon = GetSelectedPedWeapon(ped)
+    if not WhitelistedWeapon(weapon) then
+        shotAmount = shotAmount + 1
+        if shotAmount > 5 and (CurrentStatusList == nil or CurrentStatusList['gunpowder'] == nil) then
+            if math.random(1, 10) <= 7 then
+                TriggerEvent('evidence:client:SetStatus', 'gunpowder', 200)
+            end
+        end
+        DropBulletCasing(weapon, ped)
+    end
+end)
+
 -- Threads
 
 CreateThread(function()
@@ -208,25 +236,6 @@ CreateThread(function()
             end
             if shotAmount > 0 then
                 shotAmount = 0
-            end
-        end
-    end
-end)
-
-CreateThread(function() -- Gunpowder Status when shooting
-    while true do
-        Wait(1)
-        local ped = PlayerPedId()
-        if IsPedShooting(ped) then
-            local weapon = GetSelectedPedWeapon(ped)
-            if not WhitelistedWeapon(weapon) then
-                shotAmount = shotAmount + 1
-                if shotAmount > 5 and (CurrentStatusList == nil or CurrentStatusList['gunpowder'] == nil) then
-                    if math.random(1, 10) <= 7 then
-                        TriggerEvent('evidence:client:SetStatus', 'gunpowder', 200)
-                    end
-                end
-                DropBulletCasing(weapon, ped)
             end
         end
     end

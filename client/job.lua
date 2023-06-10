@@ -421,40 +421,65 @@ RegisterNetEvent('police:client:TakeOutVehicle', function(data)
 end)
 
 RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
-    local currentEvidence = data.currentEvidence
+    local currentEvidence = data.number
+    local currentType = data.type
     local pos = GetEntityCoords(PlayerPedId())
     local takeLoc = Config.Locations["evidence"][currentEvidence]
 
     if not takeLoc then return end
 
     if #(pos - takeLoc) <= 1.0 then
-        local drawer = exports['qb-input']:ShowInput({
-            header = Lang:t('info.evidence_stash', {value = currentEvidence}),
-            submitText = "open",
-            inputs = {
-                {
-                    type = 'number',
-                    isRequired = true,
-                    name = 'slot',
-                    text = Lang:t('info.slot')
+        if currentType == 'drawer' then
+            local drawer = exports['qb-input']:ShowInput({
+                header = Lang:t('info.evidence_stash', {value = currentEvidence}),
+                submitText = "open",
+                inputs = {
+                    {
+                        type = 'number',
+                        isRequired = true,
+                        name = 'slot',
+                        text = Lang:t('info.slot')
+                    }
                 }
-            }
-        })
-        if drawer then
-            if not drawer.slot then return end
-            TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = drawer.slot}), {
-                maxweight = 4000000,
-                slots = 500,
             })
-            TriggerEvent("inventory:client:SetCurrentStash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = drawer.slot}))
+            if drawer then
+                if not drawer.slot then return end
+                TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = drawer.slot}), {
+                    maxweight = 4000000,
+                    slots = 500,
+                })
+                TriggerEvent("inventory:client:SetCurrentStash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = drawer.slot}))
+            else return end
+        elseif currentType == 'stash' then
+            TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.general_current_evidence', {value = currentEvidence}), {maxweight = 4000000, slots = 300,})
+            TriggerEvent("inventory:client:SetCurrentStash", Lang:t('info.general_current_evidence', {value = currentEvidence}))
         end
+
     else
         exports['qb-menu']:closeMenu()
     end
 end)
 
 RegisterNetEvent('qb-policejob:ToggleDuty', function()
-    TriggerServerEvent("QBCore:ToggleDuty")
+    local PlayerData = QBCore.Functions.GetPlayerData()
+    local dutymenu = {}
+
+    if PlayerData.job.onduty then dutystatus = '🟢 ' .. Lang:t('menu.dty_onduty') else dutystatus = '🔴 ' .. Lang:t('menu.dty_offduty') end
+    
+    dutymenu[#dutymenu + 1] = {isMenuHeader = true, header = PlayerData.job.label, txt = 'Your duty status: '..dutystatus}
+
+    if PlayerData.job.onduty then
+        dutymenu[#dutymenu + 1] = { header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature', disabled = true,
+            params = {event = '', args = { }}}
+        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature',
+            params = {isServer = true, event = 'police:server:changeDuty', args = { duty = false}}}
+    else
+        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature',
+            params = {isServer = true, event = 'police:server:changeDuty',args = {duty = true}}}
+        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature', disabled = true,
+            params = {event = '', args = { }}}
+    end exports['qb-menu']:openMenu(dutymenu)
+
     TriggerServerEvent("police:server:UpdateCurrentCops")
     TriggerServerEvent("police:server:UpdateBlips")
 end)
@@ -532,7 +557,25 @@ local function dutylistener()
         while dutylisten do
             if PlayerJob.type == "leo" then
                 if IsControlJustReleased(0, 38) then
-                    TriggerServerEvent("QBCore:ToggleDuty")
+                    local PlayerData = QBCore.Functions.GetPlayerData()
+                    local dutymenu = {}
+                
+                    if PlayerData.job.onduty then dutystatus = '🟢 ' .. Lang:t('menu.dty_onduty') else dutystatus = '🔴 ' .. Lang:t('menu.dty_offduty') end
+                    
+                    dutymenu[#dutymenu + 1] = {isMenuHeader = true, header = PlayerData.job.label, txt = 'Your duty status: '..dutystatus}
+                
+                    if PlayerData.job.onduty then
+                        dutymenu[#dutymenu + 1] = { header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature', disabled = true,
+                            params = {event = '', args = { }}}
+                        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature',
+                            params = {isServer = true, event = 'police:server:changeDuty', args = { duty = false}}}
+                    else
+                        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature',
+                            params = {isServer = true, event = 'police:server:changeDuty',args = {duty = true}}}
+                        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature', disabled = true,
+                            params = {event = '', args = { }}}
+                    end exports['qb-menu']:openMenu(dutymenu)
+                    
                     TriggerServerEvent("police:server:UpdateCurrentCops")
                     TriggerServerEvent("police:server:UpdateBlips")
                     dutylisten = false
@@ -796,6 +839,67 @@ if Config.UseTarget then
             })
         end
 
+        for k, v in pairs(Config.Locations["evidence"]) do
+            exports['qb-target']:AddBoxZone("PoliceEvidenceStash_"..k, vector3(v.x, v.y, v.z), 2, 2, {
+                name = "PoliceEvidenceStash_"..k,
+                heading = 11,
+                debugPoly = false,
+                minZ = v.z - 1,
+                maxZ = v.z + 1,
+            }, {
+                options = {
+                    {
+                        icon = 'fa-solid fa-folder-open',
+                        label = "Open Evidence",
+                        jobType = "leo",
+                        action = function()
+                            local currentEvidence = 0
+                            local pos = GetEntityCoords(PlayerPedId())
+            
+                            for k, v in pairs(Config.Locations["evidence"]) do
+                                if #(pos - v) < 2 then
+                                    currentEvidence = k
+                                end
+                            end
+
+                            exports['qb-menu']:openMenu({
+                                {
+                                    header = QBCore.Functions.GetPlayerData().job.label,
+                                    icon = 'fa-solid fa-building-shield',
+                                    isMenuHeader = true,
+                                },
+                                {
+                                    header = Lang:t('menu.evd_drawer_h'),
+                                    txt = Lang:t('menu.evd_drawer_b'),
+                                    icon = 'fa-solid fa-list-ol',
+                                    params = {
+                                        event = 'police:client:EvidenceStashDrawer',
+                                        args = {
+                                            type = 'drawer',
+                                            number = currentEvidence
+                                        }
+                                    }
+                                },  
+                                {
+                                    header = Lang:t('menu.evd_stash_h'),
+                                    txt = Lang:t('menu.evd_stash_b'),
+                                    icon = 'fa-solid fa-folder-closed',
+                                    params = {
+                                        event = 'police:client:EvidenceStashDrawer',
+                                        args = {
+                                            type = 'stash',
+                                            number = currentEvidence
+                                        }
+                                    }
+                                },
+                            })
+                        end,
+                    },
+                },
+                distance = 1.5
+            })
+        end
+
     end)
 
 else
@@ -933,9 +1037,6 @@ else
         end
     end)
 
-end
-
-CreateThread(function()
     -- Evidence Storage
     local evidenceZones = {}
     for _, v in pairs(Config.Locations["evidence"]) do
@@ -947,14 +1048,14 @@ CreateThread(function()
             maxZ = v.z + 1,
         })
     end
-
+ 
     local evidenceCombo = ComboZone:Create(evidenceZones, {name = "evidenceCombo", debugPoly = false})
     evidenceCombo:onPlayerInOut(function(isPointInside)
         if isPointInside then
             if PlayerJob.type == "leo" and PlayerJob.onduty then
                 local currentEvidence = 0
                 local pos = GetEntityCoords(PlayerPedId())
-
+            
                 for k, v in pairs(Config.Locations["evidence"]) do
                     if #(pos - v) < 2 then
                         currentEvidence = k
@@ -976,6 +1077,10 @@ CreateThread(function()
             exports['qb-menu']:closeMenu()
         end
     end)
+
+end
+
+CreateThread(function()
 
     -- Helicopter
     local helicopterZones = {}

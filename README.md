@@ -10,6 +10,9 @@ For help, questions and other resources you can join my discord : [Hi-Dev](https
 - Multiple locations
 - Tie players with a rope item and untie them with knife
 - Target ped interactions (Robplayer, Tie / Untie, Kidnap - Escort and Cuff for policejob only)
+- Updated the evidence stash
+- Change the duty with the menu
+- You can comment on evidence bags 
 
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
@@ -70,6 +73,95 @@ For help, questions and other resources you can join my discord : [Hi-Dev](https
 - /takedna [id] - Takes a DNA sample from the player.
 
 ## Installation
+
+1 - Update the filled evidence bag in you qb-core/shared
+````
+    ['filled_evidence_bag']             = {['name'] = 'filled_evidence_bag',               ['label'] = 'Evidence Bag',              ['weight'] = 200,          ['type'] = 'item',         ['image'] = 'evidence.png',                ['unique'] = true,          ['useable'] = true,     ['shouldClose'] = true,     ['combinable'] = nil,   ['description'] = 'A filled evidence bag to see who committed the crime >:('},
+````
+
+
+2 - Update the filled evidence bag in your qb-inventory
+```
+else if (itemData.name == "filled_evidence_bag") {
+    $(".item-info-title").html("<p>" + itemData.label + "</p>");
+        if (itemData.info.type == "casing") {
+            if (itemData.info.evidenceNote != null) {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>Type number: </strong><span>" + itemData.info.ammotype + "</span></p>" +
+                    "<p><strong>Caliber: </strong><span>" + itemData.info.ammolabel + "</span></p>" +
+                    "<p><strong>Serial: </strong><span>" + itemData.info.serie + "</span></p>" +
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street + "</span></p>" + 
+                    "<br /><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
+                    "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
+                );
+            } else {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>Type number: </strong><span>" + itemData.info.ammotype + "</span></p>" +
+                    "<p><strong>Caliber: </strong><span>" + itemData.info.ammolabel + "</span></p>" +
+                    "<p><strong>Serial: </strong><span>" + itemData.info.serie + "</span></p>" +
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street + "</span></p>" + 
+                    "<br /><p>" + itemData.description +"</p>"
+                );
+            }
+        } else if (itemData.info.type == "blood") {
+            if (itemData.info.evidenceNote != null) {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label +"</span></p>" + 
+                    "<p><strong>Blood type: </strong><span>" + itemData.info.bloodtype +"</span></p>" +
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel +"</span></p>" + 
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street +"</span></p>" + 
+                    "</br><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
+                    "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
+                );
+            } else {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label +"</span></p>" + 
+                    "<p><strong>Blood type: </strong><span>" + itemData.info.bloodtype +"</span></p>" +
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel +"</span></p>" + 
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street +"</span></p>" + 
+                    "<br /><p>" + itemData.description + "</p>"
+                );
+            }
+        } else if (itemData.info.type == "fingerprint") {
+            if (itemData.info.evidenceNote != null) {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>Fingerprint: </strong><span>" + itemData.info.fingerprint + "</span></p>" + 
+                    "<p><strong>Crime Scene: </strong><span>" + itemData.info.street + "</span></p>" +
+                    "</br><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
+                    "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
+                );
+            } else {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>Fingerprint: </strong><span>" + itemData.info.fingerprint + "</span></p>" + 
+                    "<p><strong>Crime Scene: </strong><span>" + itemData.info.street + "</span></p>" + 
+                    "<br /><p>" + itemData.description + "</p>"
+                );
+            }
+
+        } else if (itemData.info.type == "dna") {
+            if (itemData.info.evidenceNote != null) {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel + "</span></p>" + 
+                    "</br><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
+                    "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
+                );
+            } else {
+                $(".item-info-description").html(
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel + "</span></p>" + 
+                    "<br /><p>" + itemData.description + "</p>"
+                );
+            }
+        }
+    }
+```
+
+
 ### Manual
 - Download the script and put it in the `[qb]` directory.
 - Add the following code to your server.cfg/resouces.cfg
