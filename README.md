@@ -12,7 +12,7 @@ For help, questions and other resources you can join my discord : [Hi-Dev](https
 - Target ped interactions (Robplayer, Tie / Untie, Kidnap - Escort and Cuff for policejob only)
 - Updated the evidence stash
 - Change the duty with the menu
-- You can comment on evidence bags 
+- You can write comment on evidence bags 
 
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
