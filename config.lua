@@ -17,6 +17,7 @@ Config.KnifeItem = 'weapon_knife'
 Config.LicenseRank = 2
 
 Config.UseTarget = GetConvar('UseTarget', 'false') == 'true'
+Config.GaragePedModel = "s_m_y_hwaycop_01"
 Config.Locations = {
     ["duty"] = {
         [1] = vector3(444.16, -980.11, 30.68), -- LSPD
@@ -24,9 +25,12 @@ Config.Locations = {
         [3] = vector3(1832.68, 3678.4, 34.28), -- Sandy 
     },
     ["vehicle"] = {
-        [1] = vector4(441.88, -1014.87, 28.66, 93.91), -- LSPD
+        [1] = vector4(442.1, -1013.92, 28.63, 184.47), -- LSPD
         [2] = vector4(-470.84, 6017.97, 31.34, 313.83), --BCSO
         [3] = vector4(1847.44, 3686.57, 33.89, 299.91), -- Sandy
+    },
+    ["vehspawn"] = {
+        [1] = vector4(442.4, -1025.02, 28.29, 4.11), -- LSPD
     },
     ["stash"] = {
         [1] = vector3(461.13, -995.88, 30.69), -- LSPD
@@ -38,8 +42,12 @@ Config.Locations = {
         [2] = vector3(1822.14, 3689.16, 33.97),
     },
     ["helicopter"] = {
-        [1] = vector4(449.16, -981.23, 43.69, 165.79), -- LSPD
+        [1] = vector4(460.24, -980.18, 43.69, 181.43), -- LSPD
         [2] = vector4(1853.54, 3705.14, 34.36, 208.93), -- Sandy
+    },
+    ["helispawn"] = {
+        [1] = vector4(449.16, -981.23, 43.69, 165.79), -- LSPD
+        
     },
     ["armory"] = {
         [1] = vector3(482.51, -995.62, 30.69), -- LSPD
@@ -64,8 +72,6 @@ Config.Locations = {
         [3] = {label = "Blaine County Sheriffs Office", coords = vector4(-448.26, 6007.83, 44.01, 225.93)},
     },
 }
-
-Config.ArmoryWhitelist = {}
 
 Config.PoliceHelicopter = "POLMAV"
 
@@ -108,67 +114,59 @@ Config.SecurityCameras = {
         [34] = {label = "Vangelico Jewelery CAM#4", coords = vector3(-622.57, -236.3, 40.31), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = true, isOnline = true},
     },
 }
-
-Config.AuthorizedVehicles = {
-    -- Grade 0
-    [0] = {
-        ["police"] = "Police Car 1",
-        ["police2"] = "Police Car 2",
-        ["police3"] = "Police Car 3",
-        ["police4"] = "Police Car 4",
-        ["policeb"] = "Police Car 5",
-        ["policet"] = "Police Car 6",
-        ["sheriff"] = "Sheriff Car 1",
-        ["sheriff2"] = "Sheriff Car 2",
-    },
-    -- Grade 1
-    [1] = {
-        ["police"] = "Police Car 1",
-        ["police2"] = "Police Car 2",
-        ["police3"] = "Police Car 3",
-        ["police4"] = "Police Car 4",
-        ["policeb"] = "Police Car 5",
-        ["policet"] = "Police Car 6",
-        ["sheriff"] = "Sheriff Car 1",
-        ["sheriff2"] = "Sheriff Car 2",
-
-    },
-    -- Grade 2
-    [2] = {
-        ["police"] = "Police Car 1",
-        ["police2"] = "Police Car 2",
-        ["police3"] = "Police Car 3",
-        ["police4"] = "Police Car 4",
-        ["policeb"] = "Police Car 5",
-        ["policet"] = "Police Car 6",
-        ["sheriff"] = "Sheriff Car 1",
-        ["sheriff2"] = "Sheriff Car 2",
-    },
-    -- Grade 3
-    [3] = {
-        ["police"] = "Police Car 1",
-        ["police2"] = "Police Car 2",
-        ["police3"] = "Police Car 3",
-        ["police4"] = "Police Car 4",
-        ["policeb"] = "Police Car 5",
-        ["policet"] = "Police Car 6",
-        ["sheriff"] = "Sheriff Car 1",
-        ["sheriff2"] = "Sheriff Car 2",
-    },
-    -- Grade 4
-    [4] = {
-        ["police"] = "Police Car 1",
-        ["police2"] = "Police Car 2",
-        ["police3"] = "Police Car 3",
-        ["police4"] = "Police Car 4",
-        ["policeb"] = "Police Car 5",
-        ["policet"] = "Police Car 6",
-        ["sheriff"] = "Sheriff Car 1",
-        ["sheriff2"] = "Sheriff Car 2",
+Config.EnableMods = true -- Enable the mods below to be applied
+Config.CarMods = { -- Mods to be enabled / disabled for vehicles
+    engine = true,
+    brakes = true,
+    gearbox = true,
+    armour = false,
+    turbo = true,
+}
+Config.EnableExtras = true
+Config.CarExtras = { -- Extra options to be enabled / disabled
+    ["extras"] = {
+        ["1"] = true, -- on/off
+        ["2"] = true,
+        ["3"] = true,
+        ["4"] = true,
+        ["5"] = true,
+        ["6"] = true,
+        ["7"] = true,
+        ["8"] = true,
+        ["9"] = true,
+        ["10"] = true,
+        ["11"] = true,
+        ["12"] = true,
+        ["13"] = true,
     }
 }
-
-Config.WhitelistedVehicles = {}
+Config.AuthorizedVehicles = {
+    -- Garage 1 vehicles (LSPD)
+    [1] = {
+        ["police"] = {label = "Police Car 1", ranks = {1,2}, livery = 1},
+        ["police2"] = {label = "Police Car 2", ranks = {1,2}, livery = 1},
+        ["police3"] = {label = "Police Car 3", ranks = {3}, livery = 1},
+        ["police4"] = {label = "Police Car 4", ranks = {3}, livery = 1},
+        ["policeb"] = {label = "Police Car 5", ranks = {3,4}, livery = 1},
+        ["policet"] = {label = "Police Car 6", ranks = {3,4}, livery = 1},
+        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1},
+        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1},
+    },
+    -- Garage 2 vehicles (BCSO)
+    [2] = {
+        ["sheriff"] = {label = "Sheriff Car 1", ranks = {1,2}, livery = 1},
+        ["sheriff2"] = {label = "Sheriff Car 2", ranks = {2,3,4}, livery = 1},
+        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1},
+        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1},
+    },
+    -- Garage 1 vehicles (Sandy)
+    [3] = {
+        ["sheriff"] = {label = "Sheriff Car 1", ranks = {1,2}, livery = 1},
+        ["sheriff2"] = {label = "Sheriff Car 2", ranks = {2,3,4}, livery = 1},
+        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1},
+        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1},
+    },
+}
 
 Config.AmmoLabels = {
     ["AMMO_PISTOL"] = "9x19mm parabellum bullet",
@@ -194,27 +192,9 @@ Config.Radars = {
 }
 
 Config.CarItems = {
-    [1] = {
-        name = "heavyarmor",
-        amount = 2,
-        info = {},
-        type = "item",
-        slot = 1,
-    },
-    [2] = {
-        name = "empty_evidence_bag",
-        amount = 10,
-        info = {},
-        type = "item",
-        slot = 2,
-    },
-    [3] = {
-        name = "police_stormram",
-        amount = 1,
-        info = {},
-        type = "item",
-        slot = 3,
-    },
+    [1] = {name = "heavyarmor", amount = 2, info = {}, type = "item", slot = 1,},
+    [2] = {name = "empty_evidence_bag", amount = 10, info = {}, type = "item", slot = 2,},
+    [3] = {name = "police_stormram", amount = 1, info = {}, type = "item", slot = 3,},
 }
 
 Config.Items = {
@@ -452,44 +432,5 @@ Config.Items = {
             slot = 23,
             authorizedJobGrades = {8, 9, 10, 11, 12}
         }
-    }
-}
-
-Config.VehicleSettings = {
-    ["car1"] = { --- Model name
-        ["extras"] = {
-            ["1"] = true, -- on/off
-            ["2"] = true,
-            ["3"] = true,
-            ["4"] = true,
-            ["5"] = true,
-            ["6"] = true,
-            ["7"] = true,
-            ["8"] = true,
-            ["9"] = true,
-            ["10"] = true,
-            ["11"] = true,
-            ["12"] = true,
-            ["13"] = true,
-        },
-        ["livery"] = 1,
-    },
-    ["car2"] = {
-        ["extras"] = {
-            ["1"] = true,
-            ["2"] = true,
-            ["3"] = true,
-            ["4"] = true,
-            ["5"] = true,
-            ["6"] = true,
-            ["7"] = true,
-            ["8"] = true,
-            ["9"] = true,
-            ["10"] = true,
-            ["11"] = true,
-            ["12"] = true,
-            ["13"] = true,
-        },
-        ["livery"] = 1,
     }
 }

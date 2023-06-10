@@ -29,7 +29,9 @@ local Translations = {
         no_driver_license = 'No drivers license',
         not_cuffed_dead = 'Civilian isn\'t cuffed or dead',
         fine_yourself = 'You Cannot Fine Yourself',
-        not_online = "This person is not online"
+        not_online = "This person is not online",
+        clearspawnpoint = "The spawn location is blocked, clear the spawnpoint!",
+        alradyhaveheli = "You already have a helicopter!"
     },
     success = {
         uncuffed = 'You have been uncuffed',
@@ -156,6 +158,8 @@ local Translations = {
         dty_offduty = 'Off Duty',
         dty_beonduty = 'Sign to on duty',
         dty_beoffduty = 'Sign to off duty',
+        spawn_heli = 'Spawn Helicopter',
+        remove_heli = 'Remove Helicopter'
     },
     email = {
         sender = 'Central Judicial Collection Agency',
