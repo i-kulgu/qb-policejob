@@ -533,6 +533,15 @@ QBCore.Functions.CreateUseableItem("moneybag", function(source, item)
     Player.Functions.AddMoney("cash", tonumber(item.info.cash), "used-moneybag")
 end)
 
+QBCore.Functions.CreateUseableItem('filled_evidence_bag', function(source, item)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+
+    if Player and Player.PlayerData.job.type == "leo" then
+        TriggerClientEvent('evidence:client:writeEvidenceNot', src, item)
+    end
+end)
+
 -- Callbacks
 QBCore.Functions.CreateCallback('police:server:isPlayerDead', function(_, cb, playerId)
     local Player = QBCore.Functions.GetPlayer(playerId)
@@ -1115,6 +1124,30 @@ end)
 
 RegisterNetEvent('police:server:SyncSpikes', function(table)
     TriggerClientEvent('police:client:SyncSpikes', -1, table)
+end)
+
+RegisterNetEvent('police:server:changeDuty', function(data)
+    local Player = QBCore.Functions.GetPlayer(source)
+    local Job = Player.PlayerData.job
+
+    if Job and Job.onduty and not data.duty then
+        Player.Functions.SetJobDuty(false)
+        QBCore.Functions.Notify(source, Lang:t("success.beingoffduty"), 'primary')
+    elseif Job and not Job.onduty and data.duty then
+        Player.Functions.SetJobDuty(true)
+        QBCore.Functions.Notify(source, Lang:t("success.beingonduty"), 'primary')
+    end
+end)
+
+RegisterNetEvent('police:server:setEvidenceBagNote', function(item, note)
+    local Player = QBCore.Functions.GetPlayer(source)
+
+    item.info.evidenceNote = note
+    item.info.noteWrite = Player.PlayerData.charinfo.firstname..' '..Player.PlayerData.charinfo.lastname
+    
+    if Player.Functions.RemoveItem('filled_evidence_bag', 1, item.slot) then
+        Player.Functions.AddItem('filled_evidence_bag', 1, item.slot, item.info)
+    end
 end)
 
 -- Threads
