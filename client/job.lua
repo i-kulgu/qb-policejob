@@ -1245,7 +1245,7 @@ else
         })
     end
 
-    local helicopterCombo = ComboZone:Create(helicopterZones, {name = "helicopterCombo", debugPoly = true})
+    local helicopterCombo = ComboZone:Create(helicopterZones, {name = "helicopterCombo", debugPoly = false})
     helicopterCombo:onPlayerInOut(function(isPointInside, _, zone)
         if isPointInside then
             inHelicopter = true

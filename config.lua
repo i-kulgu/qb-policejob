@@ -26,11 +26,13 @@ Config.Locations = {
     },
     ["vehicle"] = {
         [1] = vector4(442.1, -1013.92, 28.63, 184.47), -- LSPD
-        [2] = vector4(-470.84, 6017.97, 31.34, 313.83), --BCSO
-        [3] = vector4(1847.44, 3686.57, 33.89, 299.91), -- Sandy
+        [2] = vector4(-458.86, 6031.5, 31.34, 139.15), --BCSO
+        [3] = vector4(1858.95, 3681.95, 33.83, 219.83), -- Sandy
     },
-    ["vehspawn"] = {
-        [1] = vector4(442.4, -1025.02, 28.29, 4.11), -- LSPD
+    ["vehspawn"] = { -- The numbers [1] must match the numbers in [vehicle]
+        [1] = vector4(442.4, -1025.02, 28.29, 4.11), -- LSPD 
+        [2] = vector4(-474.63, 6030.38, 30.95, 226.12), -- BCSO
+        [3] = vector4(1850.89, 3673.04, 33.37, 211.26), -- Sandy
     },
     ["stash"] = {
         [1] = vector3(461.13, -995.88, 30.69), -- LSPD
@@ -43,11 +45,11 @@ Config.Locations = {
     },
     ["helicopter"] = {
         [1] = vector4(460.24, -980.18, 43.69, 181.43), -- LSPD
-        [2] = vector4(1853.54, 3705.14, 34.36, 208.93), -- Sandy
+        [2] = vector4(-462.15, 5994.77, 31.25, 134.84), -- BCSO
     },
-    ["helispawn"] = {
+    ["helispawn"] = { -- The numbers [1] must match the numbers in [helicopter]
         [1] = vector4(449.16, -981.23, 43.69, 165.79), -- LSPD
-        
+        [2] = vector4(-475.18, 5988.43, 31.72, 317.27), -- BCSO
     },
     ["armory"] = {
         [1] = vector3(482.51, -995.62, 30.69), -- LSPD
