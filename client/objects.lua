@@ -46,21 +46,6 @@ function GetClosestSpike()
     ClosestSpike = current
 end
 
-local function DrawText3D(x, y, z, text)
-    SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(1)
-    SetTextColour(255, 255, 255, 215)
-    SetTextEntry("STRING")
-    SetTextCentre(true)
-    AddTextComponentString(text)
-    SetDrawOrigin(x,y,z, 0)
-    DrawText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
-    ClearDrawOrigin()
-end
-
 local tires = {
     {bone = "wheel_lf", index = 0},
     {bone = "wheel_rf", index = 1},
@@ -73,7 +58,6 @@ local tires = {
 local function wheelThread(bool)
     CreateThread(function()
         while inSpikeZone do
-            print("döngü icerisindeyiz")
             if not bool then break end
             local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
             local vehiclePos = GetEntityCoords(vehicle, false)
@@ -241,32 +225,30 @@ RegisterNetEvent('police:client:spawnObject', function(objectId, type, player)
     }
 end)
 
-RegisterNetEvent('police:client:SpikePolyZone', function(spikedata)
-    for k,v in pairs(spikedata) do
-        -- QBCore.Debug(SpawnedSpikes)
-        for i=1, #SpawnedSpikes do
-            -- if v.netid == SpawnedSpikes[i].netid then return end
-            SpikeZone[#SpikeZone+1] = BoxZone:Create(v.coords, 20, 20, {
+RegisterNetEvent('police:client:SpikePolyZone', function()
+    for k,v in pairs(SpawnedSpikes) do
+        if not v.pzcreated then
+            v.pzcreated = true
+            SpikeZone[v.netid] = BoxZone:Create(v.coords, 20, 20, {
                 name="spikezone-"..v.netid,
                 debugPoly = false,
                 heading = v.heading+90,
                 minZ = v.coords.z - 2,
                 maxZ = v.coords.z + 2,
             })
+            SpikeZone[v.netid]:onPlayerInOut(function(isPointInside)
+                if isPointInside then
+                    inSpikeZone = true
+                    if isInVehicle then
+                        wheelThread(true)
+                    end
+                else
+                    inSpikeZone = false
+                    wheelThread(false)
+                end
+            end)
         end
     end
-    local SpikeCombo = ComboZone:Create(SpikeZone, {name = "SpikeCombo", debugPoly = false})
-    SpikeCombo:onPlayerInOut(function(isPointInside, _, zone)
-        if isPointInside then
-            inSpikeZone = true
-            if isInVehicle then
-                wheelThread(true)
-            end
-        else
-            inSpikeZone = false
-            wheelThread(false)
-        end
-    end)
 end)
 
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
@@ -285,6 +267,7 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
                 netid = netid,
                 object = spike,
                 heading = SpikeHeading,
+                pzcreated = false
             }
             TriggerServerEvent('police:server:SyncSpikes', SpawnedSpikes)
         end
@@ -297,46 +280,40 @@ RegisterNetEvent('police:client:SyncSpikes', function(table)
     SpawnedSpikes = table
 end)
 
--- Threads
-CreateThread(function()
-    while true do
-        if LocalPlayer.state.isLoggedIn then
-            GetClosestSpike()
+RegisterNetEvent('police:client:removeSpike', function(name)
+    for k,v in pairs(SpikeZone) do
+        if v.name == name then
+            v:destroy()
         end
-        Wait(500)
     end
 end)
 
-
-CreateThread(function()
-    while true do
-        local sleep = 1000
-        if LocalPlayer.state.isLoggedIn then
-            if ClosestSpike then
-                local ped = PlayerPedId()
-                local pos = GetEntityCoords(ped)
-                local dist = #(pos - SpawnedSpikes[ClosestSpike].coords)
-                if dist < 4 then
-                    if not IsPedInAnyVehicle(PlayerPedId()) then
-                        if PlayerJob.type == "leo" and PlayerJob.onduty then
-                            sleep = 0
-                            DrawText3D(pos.x, pos.y, pos.z, Lang:t('info.delete_spike'))
-                            if IsControlJustPressed(0, 38) then
-                                local spike = NetToEnt(SpawnedSpikes[ClosestSpike].netid)
-                                NetworkRegisterEntityAsNetworked(spike)
-                                NetworkRequestControlOfEntity(spike)
-                                SetEntityAsMissionEntity(spike)
-                                Wait(500)
-                                DeleteEntity(spike)
-                                SpawnedSpikes[ClosestSpike] = nil
-                                ClosestSpike = nil
-                                TriggerServerEvent('police:server:SyncSpikes', SpawnedSpikes)
-                            end
+exports['qb-target']:AddTargetModel(spikemodel, {
+    options = {
+        {
+            icon = "fas fa-hand-holding",
+            label = "Pick Up",
+            jobType = 'leo',
+            action = function(entity)
+                GetClosestSpike()
+                local spike = NetToEnt(SpawnedSpikes[ClosestSpike].netid)
+                if entity == spike then
+                    NetworkRegisterEntityAsNetworked(spike)
+                    NetworkRequestControlOfEntity(spike)
+                    SetEntityAsMissionEntity(spike)
+                    Wait(500)
+                    for k,v in pairs(SpikeZone) do
+                        if v.name == "spikezone-"..SpawnedSpikes[ClosestSpike].netid then
+                            TriggerServerEvent('police:server:removeSpike', v.name)
                         end
                     end
+                    DeleteEntity(spike)
+                    SpawnedSpikes[ClosestSpike] = nil
+                    ClosestSpike = nil
+                    TriggerServerEvent('police:server:SyncSpikes', SpawnedSpikes)
                 end
             end
-        end
-        Wait(sleep)
-    end
-end)
+        },
+    },
+    distance = 2.0
+})

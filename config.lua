@@ -15,7 +15,7 @@ Config.TieItem = 'ziptie'
 Config.KnifeItem = 'weapon_knife'
 
 Config.LicenseRank = 2
-
+Config.BlockWallThermals = true -- true/false; lowers thermal cam intensity to stop penetration through walls or tunnels
 Config.UseTarget = GetConvar('UseTarget', 'false') == 'true'
 Config.GaragePedModel = "s_m_y_hwaycop_01"
 Config.Locations = {

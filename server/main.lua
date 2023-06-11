@@ -1127,6 +1127,10 @@ RegisterNetEvent('police:server:SyncSpikes', function(table)
     TriggerClientEvent('police:client:SpikePolyZone', -1, table)
 end)
 
+RegisterNetEvent('police:server:removeSpike', function(name)
+    TriggerClientEvent('police:client:removeSpike', -1, name)
+end)
+
 RegisterNetEvent('police:server:changeDuty', function(data)
     local Player = QBCore.Functions.GetPlayer(source)
     local Job = Player.PlayerData.job
