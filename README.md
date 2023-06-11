@@ -13,6 +13,14 @@ For help, questions and other resources you can join my discord : [Hi-Dev](https
 - Updated the evidence stash
 - Change the duty with the menu
 - You can write comment on evidence bags 
+- Added config option for block to see trough walls with thermal in heli
+- Added target and ped for police garage
+- Every garage has his own vehicle list
+- Changed the garage logic where you can choose the job level for a specific car
+- Moved the livery option into the car options
+- Added option for max mods for engine, brake, transmission, armour, turbo
+- Added target and ped for spawning and returning helicopter
+- Only 1 heli can be spawned by 1 player
 
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
