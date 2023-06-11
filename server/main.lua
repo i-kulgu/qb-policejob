@@ -1124,6 +1124,7 @@ end)
 
 RegisterNetEvent('police:server:SyncSpikes', function(table)
     TriggerClientEvent('police:client:SyncSpikes', -1, table)
+    TriggerClientEvent('police:client:SpikePolyZone', -1, table)
 end)
 
 RegisterNetEvent('police:server:changeDuty', function(data)

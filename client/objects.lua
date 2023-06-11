@@ -3,6 +3,9 @@ local ObjectList = {}
 local SpawnedSpikes = {}
 local spikemodel = `P_ld_stinger_s`
 local ClosestSpike = nil
+local SpikeZone = {}
+local inSpikeZone = false
+local isInVehicle = false
 
 -- Functions
 local function GetClosestPoliceObject()
@@ -58,7 +61,47 @@ local function DrawText3D(x, y, z, text)
     ClearDrawOrigin()
 end
 
+local tires = {
+    {bone = "wheel_lf", index = 0},
+    {bone = "wheel_rf", index = 1},
+    {bone = "wheel_lm", index = 2},
+    {bone = "wheel_rm", index = 3},
+    {bone = "wheel_lr", index = 4},
+    {bone = "wheel_rr", index = 5}
+}
+
+local function wheelThread(bool)
+    CreateThread(function()
+        while inSpikeZone do
+            print("döngü icerisindeyiz")
+            if not bool then break end
+            local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+            local vehiclePos = GetEntityCoords(vehicle, false)
+            local spike = GetClosestObjectOfType(vehiclePos.x, vehiclePos.y, vehiclePos.z, 15.0, spikemodel, 1, 1, 1)
+            local spikePos = GetEntityCoords(spike, false)
+            local distance = #(vehiclePos - spikePos)
+            for a = 1, #tires do
+                local tirePos = GetWorldPositionOfEntityBone(vehicle, GetEntityBoneIndexByName(vehicle, tires[a].bone))
+                if #(tirePos - spikePos) < 1.8 then
+                    if not IsVehicleTyreBurst(vehicle, tires[a].index, true) or IsVehicleTyreBurst(vehicle, tires[a].index, false) then
+                        SetVehicleTyreBurst(vehicle, tires[a].index, false, 1000.0)
+                    end
+                end
+            end
+            Wait(3)
+        end
+    end)
+end
+
 -- Events
+RegisterNetEvent("QBCore:Client:EnteredVehicle", function()
+    isInVehicle = true
+end)
+
+RegisterNetEvent("QBCore:Client:LeftVehicle", function()
+    isInVehicle = false
+end)
+
 RegisterNetEvent('police:client:spawnCone', function()
     QBCore.Functions.Progressbar("spawn_object", Lang:t("progressbar.place_object"), 2500, false, true, {
         disableMovement = true,
@@ -198,12 +241,41 @@ RegisterNetEvent('police:client:spawnObject', function(objectId, type, player)
     }
 end)
 
+RegisterNetEvent('police:client:SpikePolyZone', function(spikedata)
+    for k,v in pairs(spikedata) do
+        -- QBCore.Debug(SpawnedSpikes)
+        for i=1, #SpawnedSpikes do
+            -- if v.netid == SpawnedSpikes[i].netid then return end
+            SpikeZone[#SpikeZone+1] = BoxZone:Create(v.coords, 20, 20, {
+                name="spikezone-"..v.netid,
+                debugPoly = false,
+                heading = v.heading+90,
+                minZ = v.coords.z - 2,
+                maxZ = v.coords.z + 2,
+            })
+        end
+    end
+    local SpikeCombo = ComboZone:Create(SpikeZone, {name = "SpikeCombo", debugPoly = false})
+    SpikeCombo:onPlayerInOut(function(isPointInside, _, zone)
+        if isPointInside then
+            inSpikeZone = true
+            if isInVehicle then
+                wheelThread(true)
+            end
+        else
+            inSpikeZone = false
+            wheelThread(false)
+        end
+    end)
+end)
+
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     if #SpawnedSpikes + 1 < Config.MaxSpikes then
         if PlayerJob.type == "leo" and PlayerJob.onduty then
             local spawnCoords = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 2.0, 0.0)
             local spike = CreateObject(spikemodel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 1, 1, 1)
             local netid = NetworkGetNetworkIdFromEntity(spike)
+            local SpikeHeading = GetEntityHeading(PlayerPedId())
             SetNetworkIdExistsOnAllMachines(netid, true)
             SetNetworkIdCanMigrate(netid, false)
             SetEntityHeading(spike, GetEntityHeading(PlayerPedId()))
@@ -212,6 +284,7 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
                 coords = vector3(spawnCoords.x, spawnCoords.y, spawnCoords.z),
                 netid = netid,
                 object = spike,
+                heading = SpikeHeading,
             }
             TriggerServerEvent('police:server:SyncSpikes', SpawnedSpikes)
         end
@@ -234,38 +307,6 @@ CreateThread(function()
     end
 end)
 
-CreateThread(function()
-    while true do
-        if LocalPlayer.state.isLoggedIn then
-            if ClosestSpike then
-                local tires = {
-                    {bone = "wheel_lf", index = 0},
-                    {bone = "wheel_rf", index = 1},
-                    {bone = "wheel_lm", index = 2},
-                    {bone = "wheel_rm", index = 3},
-                    {bone = "wheel_lr", index = 4},
-                    {bone = "wheel_rr", index = 5}
-                }
-
-                for a = 1, #tires do
-                    local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
-                    local tirePos = GetWorldPositionOfEntityBone(vehicle, GetEntityBoneIndexByName(vehicle, tires[a].bone))
-                    local spike = GetClosestObjectOfType(tirePos.x, tirePos.y, tirePos.z, 15.0, spikemodel, 1, 1, 1)
-                    local spikePos = GetEntityCoords(spike, false)
-                    local distance = #(tirePos - spikePos)
-
-                    if distance < 1.8 then
-                        if not IsVehicleTyreBurst(vehicle, tires[a].index, true) or IsVehicleTyreBurst(vehicle, tires[a].index, false) then
-                            SetVehicleTyreBurst(vehicle, tires[a].index, false, 1000.0)
-                        end
-                    end
-                end
-            end
-        end
-
-        Wait(3)
-    end
-end)
 
 CreateThread(function()
     while true do
