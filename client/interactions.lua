@@ -403,32 +403,38 @@ RegisterNetEvent('police:client:GetKidnappedDragger', function()
 end)
 
 RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
-    local ped = PlayerPedId()
     if not isHandcuffed then
-        isHandcuffed = true
-        TriggerServerEvent("police:server:SetHandcuffStatus", true)
-        ClearPedTasksImmediately(ped)
-        if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then
-            SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true)
-        end
-        if not isSoftcuff then
-            cuffType = 16
-            GetCuffedAnimation(playerId)
-            QBCore.Functions.Notify(Lang:t("info.cuff"), 'primary')
-        else
-            cuffType = 49
-            GetCuffedAnimation(playerId)
-            QBCore.Functions.Notify(Lang:t("info.cuffed_walk"), 'primary')
-        end
+        local seconds = math.random(6,6)
+        exports['ps-ui']:Circle(function(success)
+            if success then
+                QBCore.Functions.Notify("You managed to break free", "success")
+                TriggerServerEvent('police:server:cuffstruggle')    
+            else
+                isHandcuffed = true
+                TriggerServerEvent("police:server:SetHandcuffStatus", true)
+                ClearPedTasksImmediately(PlayerPedId())
+                if GetSelectedPedWeapon(PlayerPedId()) ~= GetHashKey('WEAPON_UNARMED') then
+                    SetCurrentPedWeapon(PlayerPedId(), GetHashKey('WEAPON_UNARMED'), true)
+                end
+                if not isSoftcuff then
+                    cuffType = 16
+                    GetCuffedAnimation(playerId)
+                    QBCore.Functions.Notify("You Are Cuffed, But You Can Walk", "error", 5000)
+                else
+                    cuffType = 49
+                    GetCuffedAnimation(playerId)
+                    QBCore.Functions.Notify("You Have Been Handcuffed", "error", 5000)
+                end    
+            end
+        end, 5, seconds)
     else
         isHandcuffed = false
         isEscorted = false
         TriggerEvent('hospital:client:isEscorted', isEscorted)
-        DetachEntity(ped, true, false)
+        DetachEntity(PlayerPedId(), true, false)
         TriggerServerEvent("police:server:SetHandcuffStatus", false)
-        ClearPedTasksImmediately(ped)
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
-        QBCore.Functions.Notify(Lang:t("success.uncuffed"),"success")
+        ClearPedTasksImmediately(PlayerPedId())
+        QBCore.Functions.Notify("You Are Uncuffed!")
     end
 end)
 
