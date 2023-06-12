@@ -11,6 +11,7 @@ local inGarage = false
 local GaragePed = {}
 local HeliPed = {}
 local Heli = nil
+local PDCar = {}
 
 local function loadAnimDict(dict) -- interactions, job,
     while (not HasAnimDictLoaded(dict)) do
@@ -186,6 +187,7 @@ local function TakeOutVehicle(vehicleInfo)
                     QBCore.Shared.SetDefaultVehicleExtras(veh, Config.CarExtras.extras)
                 end
             end
+            PDCar[#PDCar+1] = {veh = veh, model = vehicleInfo}
             SetVehicleLivery(veh,vehicleInfo.livery)
             TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
             TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
@@ -213,20 +215,49 @@ local function MenuGarage(currentSelection)
 
     local authorizedVehicles = Config.AuthorizedVehicles[currentSelection]
     for veh, data in pairs(authorizedVehicles) do
-        for _,v in pairs(data.ranks) do
-            if v == PlayerJob.grade.level then
-                vehicleMenu[#vehicleMenu+1] = {
-                    header = data.label,
-                    txt = "",
-                    params = {
-                        event = "police:client:TakeOutVehicle",
-                        args = {
-                            vehicle = veh,
-                            currentSelection = currentSelection,
-                            livery = data.livery
+        if PDCar and next(PDCar) then
+            for l, b in pairs(PDCar) do
+                if b.model == veh then
+                    for _,v in pairs(data.ranks) do
+                        if v == PlayerJob.grade.level then
+                            vehicleMenu[#vehicleMenu+1] = {
+                                header = data.label,
+                                txt = "",
+                                params = {
+                                    event = "police:client:VehicleSubMenu",
+                                    args = {
+                                        vehicle = veh,
+                                        vehlabel = veh,
+                                        currentSelection = currentSelection,
+                                        livery = data.livery,
+                                        car = b.veh,
+                                        tableid = l,
+                                        out = true
+                                    }
+                                }
+                            }
+                        end
+                    end
+                end
+            end
+        else
+            for _,v in pairs(data.ranks) do
+                if v == PlayerJob.grade.level then
+                    vehicleMenu[#vehicleMenu+1] = {
+                        header = data.label,
+                        txt = "",
+                        params = {
+                            event = "police:client:TakeOutVehicle",
+                            args = {
+                                vehicle = veh,
+                                vehlabel = veh,
+                                currentSelection = currentSelection,
+                                livery = data.livery,
+                                out = false
+                            }
                         }
                     }
-                }
+                end
             end
         end
     end
@@ -428,6 +459,18 @@ RegisterNetEvent('police:client:TakeOutImpound', function(data)
     end
 end)
 
+RegisterNetEvent('police:client:VehicleSubMenu', function(data)
+    local SubMenu = {}
+    SubMenu[#SubMenu+1] = {header = data.vehlabel.." Menu", txt = "Take out or return your vehicle", isMenuHeader = true}
+    if data.out then
+        SubMenu[#SubMenu+1] = {header = 'Return '..data.vehlabel, txt = "", params = {event = "police:client:ReturnVehicle", args = {car = data.car}}}
+        table.remove(PDCar, data.tableid)
+    else
+        SubMenu[#SubMenu+1] = {header = 'Take out '..data.vehlabel, txt = "", params = {event = "police:client:TakeOutVehicle", args = {vehicle = data.vehicle, currentSelection = data.currentSelection, livery = data.livery}}}
+    end
+    exports['qb-menu']:openMenu(SubMenu)
+end)
+
 RegisterNetEvent('police:client:TakeOutVehicle', function(data)
     if Config.UseTarget then
         local vehicle = data.vehicle
@@ -438,6 +481,10 @@ RegisterNetEvent('police:client:TakeOutVehicle', function(data)
             TakeOutVehicle(vehicle)
         end
     end
+end)
+
+RegisterNetEvent('police:client:ReturnVehicle', function(data)
+    QBCore.Functions.DeleteVehicle(data.car)
 end)
 
 RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
@@ -485,7 +532,7 @@ RegisterNetEvent('qb-policejob:ToggleDuty', function()
     local dutymenu = {}
 
     if PlayerData.job.onduty then dutystatus = '🟢 ' .. Lang:t('menu.dty_onduty') else dutystatus = '🔴 ' .. Lang:t('menu.dty_offduty') end
-    
+
     dutymenu[#dutymenu + 1] = {isMenuHeader = true, header = PlayerData.job.label, txt = 'Your duty status: '..dutystatus}
 
     if PlayerData.job.onduty then
@@ -587,11 +634,11 @@ local function dutylistener()
                 if IsControlJustReleased(0, 38) then
                     local PlayerData = QBCore.Functions.GetPlayerData()
                     local dutymenu = {}
-                
+
                     if PlayerData.job.onduty then dutystatus = '🟢 ' .. Lang:t('menu.dty_onduty') else dutystatus = '🔴 ' .. Lang:t('menu.dty_offduty') end
-                    
+
                     dutymenu[#dutymenu + 1] = {isMenuHeader = true, header = PlayerData.job.label, txt = 'Your duty status: '..dutystatus}
-                
+
                     if PlayerData.job.onduty then
                         dutymenu[#dutymenu + 1] = { header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature', disabled = true,
                             params = {event = '', args = { }}}
@@ -603,7 +650,7 @@ local function dutylistener()
                         dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature', disabled = true,
                             params = {event = '', args = { }}}
                     end exports['qb-menu']:openMenu(dutymenu)
-                    
+
                     TriggerServerEvent("police:server:UpdateCurrentCops")
                     TriggerServerEvent("police:server:UpdateBlips")
                     dutylisten = false
@@ -883,7 +930,7 @@ if Config.UseTarget then
                         action = function()
                             local currentEvidence = 0
                             local pos = GetEntityCoords(PlayerPedId())
-            
+
                             for k, v in pairs(Config.Locations["evidence"]) do
                                 if #(pos - v) < 2 then
                                     currentEvidence = k
@@ -907,7 +954,7 @@ if Config.UseTarget then
                                             number = currentEvidence
                                         }
                                     }
-                                },  
+                                },
                                 {
                                     header = Lang:t('menu.evd_stash_h'),
                                     txt = Lang:t('menu.evd_stash_b'),
@@ -939,8 +986,8 @@ if Config.UseTarget then
             TaskStartScenarioInPlace(GaragePed[k], "WORLD_HUMAN_CLIPBOARD", 0, true)
             exports['qb-target']:AddBoxZone("GaragePed"..k, vector3(v.x,v.y,v.z), 0.8, 0.6, {
                 name = "GaragePed"..k, heading=v.w, debugPoly=false, minZ=v.z - 2, maxZ=v.z + 2,}, {
-                options = {{ 
-                    type = "client", 
+                options = {{
+                    type = "client",
                     event = "police:client:VehicleMenuHeader",
                     label = Lang:t("menu.pol_garage"),
                     currentSelection = k,
@@ -975,9 +1022,9 @@ if Config.UseTarget then
             exports['qb-target']:AddBoxZone("HeliPed"..k, vector3(v.x,v.y,v.z), 0.8, 0.6, {
                 name = "HeliPed"..k, heading=v.w, debugPoly=false, minZ=v.z - 2, maxZ=v.z + 2,}, {
                 options = {
-                    { 
-                        label = Lang:t("menu.spawn_heli"), 
-                        icon = 'fas fa-helicopter', 
+                    {
+                        label = Lang:t("menu.spawn_heli"),
+                        icon = 'fas fa-helicopter',
                         jobType = "leo",
                         canInteract = function()
                             if not Heli then return true end
@@ -986,9 +1033,9 @@ if Config.UseTarget then
                             TriggerEvent('qb-police:client:spawnHelicopter', k)
                         end,
                     },
-                    { 
-                        label = Lang:t("menu.remove_heli"), 
-                        icon = 'fas fa-helicopter', 
+                    {
+                        label = Lang:t("menu.remove_heli"),
+                        icon = 'fas fa-helicopter',
                         jobType = "leo",
                         canInteract = function()
                             if Heli then return true end
@@ -1144,14 +1191,14 @@ else
             maxZ = v.z + 1,
         })
     end
- 
+
     local evidenceCombo = ComboZone:Create(evidenceZones, {name = "evidenceCombo", debugPoly = false})
     evidenceCombo:onPlayerInOut(function(isPointInside)
         if isPointInside then
             if PlayerJob.type == "leo" and PlayerJob.onduty then
                 local currentEvidence = 0
                 local pos = GetEntityCoords(PlayerPedId())
-            
+
                 for k, v in pairs(Config.Locations["evidence"]) do
                     if #(pos - v) < 2 then
                         currentEvidence = k
@@ -1167,7 +1214,7 @@ else
                                 number = currentEvidence
                             }
                         }
-                    },  
+                    },
                     { header = Lang:t('menu.evd_stash_h'), txt = Lang:t('menu.evd_stash_b'), icon = 'fa-solid fa-folder-closed',
                         params = {
                             event = 'police:client:EvidenceStashDrawer',
