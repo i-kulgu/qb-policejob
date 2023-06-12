@@ -5,6 +5,8 @@ This is an edited version of the official qb-policejob with added features.
 
 For help, questions and other resources you can join my discord : [Hi-Dev](https://discord.com/invite/pSJPPctrNx)
 
+If you like my work and want to support me : [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F2F3EU9ME)
+
 ## Features
 ### New
 - Multiple locations
