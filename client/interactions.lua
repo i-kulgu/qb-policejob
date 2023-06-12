@@ -466,7 +466,7 @@ RegisterNetEvent('police:client:GetTied', function(playerId, isSoftcuff)
     end
 end)
 
-RegisternetEvent('police:client:setEscortStatus', function(bool)
+RegisterNetEvent('police:client:setEscortStatus', function(bool)
     isEscortingPlayer = bool
 end)
 
