@@ -703,6 +703,10 @@ RegisterNetEvent('police:server:TiePlayer', function(playerId, isSoftcuff)
     end
 end)
 
+RegisterNetEvent('police:server:isEscortingPlayer', function(bool, playerId)
+    TriggerClientEvent('police:client:setEscortStatus', playerId, bool)
+end)
+
 RegisterNetEvent('police:server:EscortPlayer', function(playerId)
     local src = source
     local playerPed = GetPlayerPed(src)
@@ -1149,7 +1153,7 @@ RegisterNetEvent('police:server:setEvidenceBagNote', function(item, note)
 
     item.info.evidenceNote = note
     item.info.noteWrite = Player.PlayerData.charinfo.firstname..' '..Player.PlayerData.charinfo.lastname
-    
+
     if Player.Functions.RemoveItem('filled_evidence_bag', 1, item.slot) then
         Player.Functions.AddItem('filled_evidence_bag', 1, item.slot, item.info)
     end

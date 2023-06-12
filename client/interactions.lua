@@ -1,5 +1,6 @@
 -- Variables
 local isEscorting = false
+local isEscortingPlayer = false
 
 -- Functions
 exports('IsHandcuffed', function()
@@ -339,10 +340,12 @@ RegisterNetEvent('police:client:GetEscorted', function(playerId)
             if not isEscorted then
                 isEscorted = true
                 local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
+                TriggerServerEvent('police:server:isEscortingPlayer', true, playerId)
                 SetEntityCoords(ped, GetOffsetFromEntityInWorldCoords(dragger, 0.0, 0.45, 0.0))
                 AttachEntityToEntity(ped, dragger, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
             else
                 isEscorted = false
+                TriggerServerEvent('police:server:isEscortingPlayer', false, playerId)
                 DetachEntity(ped, true, false)
             end
             TriggerEvent('hospital:client:isEscorted', isEscorted)
@@ -463,6 +466,10 @@ RegisterNetEvent('police:client:GetTied', function(playerId, isSoftcuff)
     end
 end)
 
+RegisternetEvent('police:client:setEscortStatus', function(bool)
+    isEscortingPlayer = bool
+end)
+
 -- Threads
 CreateThread(function()
     while true do
@@ -477,7 +484,10 @@ CreateThread(function()
             EnableControlAction(0, 249, true)
             EnableControlAction(0, 46, true)
         end
-
+        if isEscortingPlayer then
+            DisableControlAction(0, 21, true) -- Sprint (shift)
+            DisableControlAction(0, 22, true) -- Jump (spacebar)
+        end
         if isHandcuffed then
             DisableControlAction(0, 24, true) -- Attack
             DisableControlAction(0, 257, true) -- Attack 2
@@ -528,7 +538,7 @@ CreateThread(function()
 end)
 
 exports['qb-target']:AddGlobalPlayer({
-    options = { 
+    options = {
         {
           type = "client",
           event = "police:client:RobPlayer",
