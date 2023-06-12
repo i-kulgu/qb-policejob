@@ -12,7 +12,7 @@ For help, questions and other resources you can join my discord : [Hi-Dev](https
 - Target ped interactions (Robplayer, Tie / Untie, Kidnap - Escort and Cuff for policejob only)
 - Updated the evidence stash
 - Change the duty with the menu
-- You can write comment on evidence bags 
+- You can write comment on evidence bags
 - Added config option for block to see trough walls with thermal in heli
 - Added target and ped for police garage
 - Every garage has his own vehicle list
@@ -21,6 +21,7 @@ For help, questions and other resources you can join my discord : [Hi-Dev](https
 - Added option for max mods for engine, brake, transmission, armour, turbo
 - Added target and ped for spawning and returning helicopter
 - Only 1 heli can be spawned by 1 player
+- Each officier can get 1 vehicle and return it from ped menu
 
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
@@ -95,57 +96,57 @@ else if (itemData.name == "filled_evidence_bag") {
         if (itemData.info.type == "casing") {
             if (itemData.info.evidenceNote != null) {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" +
                     "<p><strong>Type number: </strong><span>" + itemData.info.ammotype + "</span></p>" +
                     "<p><strong>Caliber: </strong><span>" + itemData.info.ammolabel + "</span></p>" +
                     "<p><strong>Serial: </strong><span>" + itemData.info.serie + "</span></p>" +
-                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street + "</span></p>" + 
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street + "</span></p>" +
                     "<br /><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
                     "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
                 );
             } else {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" +
                     "<p><strong>Type number: </strong><span>" + itemData.info.ammotype + "</span></p>" +
                     "<p><strong>Caliber: </strong><span>" + itemData.info.ammolabel + "</span></p>" +
                     "<p><strong>Serial: </strong><span>" + itemData.info.serie + "</span></p>" +
-                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street + "</span></p>" + 
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street + "</span></p>" +
                     "<br /><p>" + itemData.description +"</p>"
                 );
             }
         } else if (itemData.info.type == "blood") {
             if (itemData.info.evidenceNote != null) {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label +"</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label +"</span></p>" +
                     "<p><strong>Blood type: </strong><span>" + itemData.info.bloodtype +"</span></p>" +
-                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel +"</span></p>" + 
-                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street +"</span></p>" + 
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel +"</span></p>" +
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street +"</span></p>" +
                     "</br><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
                     "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
                 );
             } else {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label +"</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label +"</span></p>" +
                     "<p><strong>Blood type: </strong><span>" + itemData.info.bloodtype +"</span></p>" +
-                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel +"</span></p>" + 
-                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street +"</span></p>" + 
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel +"</span></p>" +
+                    "<p><strong>Crime scene: </strong><span>" + itemData.info.street +"</span></p>" +
                     "<br /><p>" + itemData.description + "</p>"
                 );
             }
         } else if (itemData.info.type == "fingerprint") {
             if (itemData.info.evidenceNote != null) {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
-                    "<p><strong>Fingerprint: </strong><span>" + itemData.info.fingerprint + "</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" +
+                    "<p><strong>Fingerprint: </strong><span>" + itemData.info.fingerprint + "</span></p>" +
                     "<p><strong>Crime Scene: </strong><span>" + itemData.info.street + "</span></p>" +
                     "</br><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
                     "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
                 );
             } else {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
-                    "<p><strong>Fingerprint: </strong><span>" + itemData.info.fingerprint + "</span></p>" + 
-                    "<p><strong>Crime Scene: </strong><span>" + itemData.info.street + "</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" +
+                    "<p><strong>Fingerprint: </strong><span>" + itemData.info.fingerprint + "</span></p>" +
+                    "<p><strong>Crime Scene: </strong><span>" + itemData.info.street + "</span></p>" +
                     "<br /><p>" + itemData.description + "</p>"
                 );
             }
@@ -153,15 +154,15 @@ else if (itemData.name == "filled_evidence_bag") {
         } else if (itemData.info.type == "dna") {
             if (itemData.info.evidenceNote != null) {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
-                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel + "</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" +
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel + "</span></p>" +
                     "</br><p><strong>Note Writer: </strong><span>" + itemData.info.noteWrite + "</span></p>" +
                     "<p><strong>Note: </strong><span>" + itemData.info.evidenceNote + "</span></p>"
                 );
             } else {
                 $(".item-info-description").html(
-                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" + 
-                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel + "</span></p>" + 
+                    "<p><strong>Evidence material: </strong><span>" + itemData.info.label + "</span></p>" +
+                    "<p><strong>DNA Code: </strong><span>" + itemData.info.dnalabel + "</span></p>" +
                     "<br /><p>" + itemData.description + "</p>"
                 );
             }
