@@ -1,6 +1,7 @@
 -- Variables
 local isEscorting = false
-local isEscortingPlayer = false
+local cuffitem, cutteritem = nil, nil
+local animDict, animName = nil, nil
 
 -- Functions
 exports('IsHandcuffed', function()
@@ -11,6 +12,13 @@ local function loadAnimDict(dict) -- interactions, job,
     while (not HasAnimDictLoaded(dict)) do
         RequestAnimDict(dict)
         Wait(10)
+    end
+end
+
+local function LoadCuffModel(prop)
+    local modelHash = GetHashKey(prop)
+    if not HasModelLoaded(modelHash) then RequestModel(modelHash)
+        while not HasModelLoaded(modelHash) do Wait(1) end
     end
 end
 
@@ -27,34 +35,27 @@ local function IsTargetDead(playerId)
     return retval
 end
 
-local function HandCuffAnimation()
-    local ped = PlayerPedId()
-    if isHandcuffed == true then
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
-    else
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
-    end
-
-    loadAnimDict("mp_arrest_paired")
-    Wait(100)
-    TaskPlayAnim(ped, "mp_arrest_paired", "cop_p2_back_right", 3.0, 3.0, -1, 48, 0, 0, 0, 0)
-    TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
-    Wait(3500)
-    TaskPlayAnim(ped, "mp_arrest_paired", "exit", 3.0, 3.0, -1, 48, 0, 0, 0, 0)
+local function CuffAnim(dict, anim)
+    loadAnimDict(dict)
+    TaskPlayAnim(PlayerPedId(), dict, anim, 8.0, -8, -1, 49, 0, false, false, false)
+    Wait(2000)
+    ClearPedTasks(PlayerPedId())
 end
 
-local function GetCuffedAnimation(playerId)
-    local ped = PlayerPedId()
-    local cuffer = GetPlayerPed(GetPlayerFromServerId(playerId))
-    local heading = GetEntityHeading(cuffer)
-    TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
-    loadAnimDict("mp_arrest_paired")
-    SetEntityCoords(ped, GetOffsetFromEntityInWorldCoords(cuffer, 0.0, 0.45, 0.0))
+local function CreateHandCuff(prop, ped)
+    cuffitem = CreateObject(GetHashKey(prop), GetEntityCoords(ped), true, true, true)
+    local networkId = ObjToNet(cuffitem)
+    SetNetworkIdExistsOnAllMachines(networkId, true)
+    SetNetworkIdCanMigrate(networkId, false)
+    NetworkSetNetworkIdDynamic(networkId, true)
+end
 
-    Wait(100)
-    SetEntityHeading(ped, heading)
-    TaskPlayAnim(ped, "mp_arrest_paired", "crook_p2_back_right", 3.0, 3.0, -1, 32, 0, 0, 0, 0 ,true, true, true)
-    Wait(2500)
+local function CreateBoltCutter(prop, ped)
+    cutteritem = CreateObject(GetHashKey(prop), GetEntityCoords(ped), true, true, true)
+    local networkId = ObjToNet(cuffitem)
+    SetNetworkIdExistsOnAllMachines(networkId, true)
+    SetNetworkIdCanMigrate(networkId, false)
+    NetworkSetNetworkIdDynamic(networkId, true)
 end
 
 -- Events
@@ -257,17 +258,29 @@ RegisterNetEvent('police:client:KidnapPlayer', function()
     end
 end)
 
-RegisterNetEvent('police:client:CuffPlayerSoft', function()
+RegisterNetEvent('police:client:CuffPlayer', function(item)
     if not IsPedRagdoll(PlayerPedId()) then
         local player, distance = QBCore.Functions.GetClosestPlayer()
-        if player ~= -1 and distance < 2.5 then
-            local playerId = GetPlayerServerId(player)
-            if not IsPedInAnyVehicle(GetPlayerPed(player)) and not IsPedInAnyVehicle(PlayerPedId()) then
-                TriggerServerEvent("police:server:CuffPlayer", playerId, true)
-                HandCuffAnimation()
-            else
-                QBCore.Functions.Notify(Lang:t("error.vehicle_cuff"), "error")
-            end
+        if player ~= -1 and distance <= 2.5 then
+            QBCore.Functions.TriggerCallback('police:server:getCuffStatus', function(cuffstat)
+                local cuffed = false
+                if cuffstat and (item ~= Config.CuffKeyItem or item ~= Config.CutTieItem) and (cuffstat.cuffed and cuffstat.item == item) then QBCore.Functions.Notify(Lang:t("error.already_cuffed"), "error") return end
+                if cuffstat and cuffstat.cuffed then cuffed = true end
+                if not cuffed and item == Config.CuffKeyItem or item == Config.CutTieItem then return end
+                TaskTurnPedToFaceEntity(PlayerPedId(), GetPlayerPed(player),1000)
+                local facing = IsPedFacingPed(GetPlayerPed(player), PlayerPedId(),60.0)
+                if facing then
+                    if cuffed and cuffstat.pos ~= "front" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
+                    TriggerServerEvent('police:server:CuffPlayer', "front", GetPlayerServerId(player), item)
+                    loadAnimDict("mp_arresting")
+                    CuffAnim("mp_arresting", "a_uncuff")
+                else
+                    if cuffed and cuffstat.pos ~= "back" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
+                    TriggerServerEvent('police:server:CuffPlayer', "back", GetPlayerServerId(player), item)
+                    loadAnimDict("mp_arresting")
+                    CuffAnim("mp_arresting", "a_uncuff")
+                end
+            end, GetPlayerServerId(player))
         else
             QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
         end
@@ -276,22 +289,30 @@ RegisterNetEvent('police:client:CuffPlayerSoft', function()
     end
 end)
 
-RegisterNetEvent('police:client:CuffPlayer', function()
+RegisterNetEvent('police:client:UnCuffPlayer', function(item)
     if not IsPedRagdoll(PlayerPedId()) then
         local player, distance = QBCore.Functions.GetClosestPlayer()
-        if player ~= -1 and distance < 1.5 then
-            local result = QBCore.Functions.HasItem(Config.HandCuffItem)
-            if result then
-                local playerId = GetPlayerServerId(player)
-                if not IsPedInAnyVehicle(GetPlayerPed(player)) and not IsPedInAnyVehicle(PlayerPedId()) then
-                    TriggerServerEvent("police:server:CuffPlayer", playerId, false)
-                    HandCuffAnimation()
+        if player ~= -1 and distance <= 2.5 then
+            QBCore.Functions.TriggerCallback('police:server:getCuffStatus', function(cuffstat)
+                if not cuffstat then QBCore.Functions.Notify(Lang:t("error.not_cuffed_dead"), "error") return end
+                if Config.CuffItems[cuffstat.item] and item == Config.CuffItems[cuffstat.item].keyitem then
+                    TaskTurnPedToFaceEntity(PlayerPedId(), GetPlayerPed(player),1000)
+                    local facing = IsPedFacingPed(GetPlayerPed(player), PlayerPedId(),60.0)
+                    if facing then
+                        if cuffstat.cuffed and cuffstat.pos ~= "front" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
+                        TriggerServerEvent('police:server:CuffPlayer', "front", GetPlayerServerId(player), item)
+                        loadAnimDict("mp_arresting")
+                        CuffAnim("mp_arresting", "a_uncuff")
+                    else
+                        if cuffstat.cuffed and cuffstat.pos ~= "back" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
+                        TriggerServerEvent('police:server:CuffPlayer', "back", GetPlayerServerId(player), item)
+                        loadAnimDict("mp_arresting")
+                        CuffAnim("mp_arresting", "a_uncuff")
+                    end
                 else
-                    QBCore.Functions.Notify(Lang:t("error.vehicle_cuff"), "error")
+                    QBCore.Functions.Notify(Lang:t("error.cant_cut"), "error")
                 end
-            else
-                QBCore.Functions.Notify(Lang:t("error.no_cuff"), "error")
-            end
+            end, GetPlayerServerId(player))
         else
             QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
         end
@@ -300,31 +321,64 @@ RegisterNetEvent('police:client:CuffPlayer', function()
     end
 end)
 
-RegisterNetEvent('police:client:TiePlayer', function()
+RegisterNetEvent('police:client:useCuffCutter', function(item)
     if not IsPedRagdoll(PlayerPedId()) then
         local player, distance = QBCore.Functions.GetClosestPlayer()
-        if player ~= -1 and distance < 2.5 then
-            local result = QBCore.Functions.HasItem(Config.TieItem)
-            local hasknife = QBCore.Functions.HasItem(Config.KnifeItem)
-            if result and not isHandcuffed then
-                local playerId = GetPlayerServerId(player)
-                if not IsPedInAnyVehicle(GetPlayerPed(player)) and not IsPedInAnyVehicle(PlayerPedId()) then
-                    TriggerServerEvent("police:server:TiePlayer", playerId, false)
-                    HandCuffAnimation()
+        if player ~= -1 and distance <= 2.5 then
+            QBCore.Functions.TriggerCallback('police:server:getCuffStatus', function(cuffstat)
+                if not cuffstat then QBCore.Functions.Notify(Lang:t("error.not_cuffed_dead"), "error") return end
+                if Config.CuffItems[cuffstat.item] and Config.CuffItems[cuffstat.item].needkey then
+                    TaskTurnPedToFaceEntity(PlayerPedId(), GetPlayerPed(player),1000)
+                    local facing = IsPedFacingPed(GetPlayerPed(player), PlayerPedId(),60.0)
+                    if facing then
+                        if cuffstat.cuffed and cuffstat.pos ~= "front" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
+                        local prop = "h4_prop_h4_bolt_cutter_01a"
+                        LoadCuffModel(prop)
+                        CreateBoltCutter(prop, PlayerPedId())
+                        AttachEntityToEntity(cutteritem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422), -0.03, 0.0, 0.0, 0.0, -90.0, 0.0, true, true, false, true, 1, true)
+                        QBCore.Functions.Progressbar('name', 'Cutting cuffs...', 6000, false, true, {
+                            disableMovement = true,
+                            disableCarMovement = true,
+                            disableMouse = false,
+                            disableCombat = true,
+                        }, {
+                            animDict = 'anim@scripted@heist@ig4_bolt_cutters@male@',
+                            anim = 'action_male',
+                            flags = 16,
+                        }, {}, {}, function()
+                            TriggerServerEvent('police:server:CutCuffs', GetPlayerServerId(player), item)
+                            DeleteEntity(cutteritem)
+                        end, function()
+                            QBCore.Functions.Notify(Lang:t("error.canceled"), "error")
+                            DeleteEntity(cutteritem)
+                        end)
+                    else
+                        if cuffstat.cuffed and cuffstat.pos ~= "back" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
+                        local prop = "h4_prop_h4_bolt_cutter_01a"
+                        LoadCuffModel(prop)
+                        CreateBoltCutter(prop, PlayerPedId())
+                        AttachEntityToEntity(cutteritem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422), -0.03, 0.0, 0.0, 0.0, -90.0, 0.0, true, true, false, true, 1, true)
+                        QBCore.Functions.Progressbar('name', 'Cutting cuffs...', 6000, false, true, {
+                            disableMovement = true,
+                            disableCarMovement = true,
+                            disableMouse = false,
+                            disableCombat = true,
+                        }, {
+                            animDict = 'anim@scripted@heist@ig4_bolt_cutters@male@',
+                            anim = 'action_male',
+                            flags = 16,
+                        }, {}, {}, function()
+                            TriggerServerEvent('police:server:CutCuffs', GetPlayerServerId(player), item)
+                            DeleteEntity(cutteritem)
+                        end, function()
+                            QBCore.Functions.Notify(Lang:t("error.canceled"), "error")
+                            DeleteEntity(cutteritem)
+                        end)
+                    end
                 else
-                    QBCore.Functions.Notify(Lang:t("error.vehicle_tie"), "error")
+                    QBCore.Functions.Notify(Lang:t("error.cant_cut"), "error")
                 end
-            elseif isHandcuffed and hasknife then
-                local playerId = GetPlayerServerId(player)
-                if not IsPedInAnyVehicle(GetPlayerPed(player)) and not IsPedInAnyVehicle(PlayerPedId()) then
-                    TriggerServerEvent("police:server:TiePlayer", playerId, false)
-                    HandCuffAnimation()
-                else
-                    QBCore.Functions.Notify(Lang:t("error.vehicle_tie"), "error")
-                end
-            else
-                QBCore.Functions.Notify(Lang:t("error.no_knife"), "error")
-            end
+            end, GetPlayerServerId(player))
         else
             QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
         end
@@ -405,69 +459,65 @@ RegisterNetEvent('police:client:GetKidnappedDragger', function()
     end)
 end)
 
-RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
+RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
     local ped = PlayerPedId()
     if not isHandcuffed then
         isHandcuffed = true
-        TriggerServerEvent("police:server:SetHandcuffStatus", true)
+        TriggerServerEvent("police:server:SetHandcuffStatus", true, item, position)
         ClearPedTasksImmediately(ped)
-        if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then
-            SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true)
+        if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true) end
+        local prop = nil
+        for k,v in pairs(Config.CuffItems) do
+            if k == item then
+                prop = v.propname
+            end
         end
-        if not isSoftcuff then
-            cuffType = 16
-            GetCuffedAnimation(playerId)
-            QBCore.Functions.Notify(Lang:t("info.cuff"), 'primary')
+        if position == "front" then
+            animName = "idle"
+            animDict = "anim@move_m@prisoner_cuffed"
+            loadAnimDict(animDict)
+            Wait(1500)
+            LoadCuffModel(prop)
+            CreateHandCuff(prop, PlayerPedId())
+            AttachEntityToEntity(cuffitem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 60309), -0.058, 0.005, 0.090, 290.0, 95.0, 120.0, true, false, false, false, 0, true)
         else
-            cuffType = 49
-            GetCuffedAnimation(playerId)
-            QBCore.Functions.Notify(Lang:t("info.cuffed_walk"), 'primary')
+            animName = "idle"
+            animDict = "mp_arresting"
+            loadAnimDict(animDict)
+            Wait(1500)
+            LoadCuffModel(prop)
+            CreateHandCuff(prop, PlayerPedId())
+            AttachEntityToEntity(cuffitem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 60309), -0.055, 0.06, 0.04, 265.0, 155.0, 80.0, true, false, false, false, 0, true)
         end
     else
-        isHandcuffed = false
-        isEscorted = false
-        TriggerEvent('hospital:client:isEscorted', isEscorted)
-        DetachEntity(ped, true, false)
-        TriggerServerEvent("police:server:SetHandcuffStatus", false)
-        ClearPedTasksImmediately(ped)
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
-        QBCore.Functions.Notify(Lang:t("success.uncuffed"),"success")
+        if tostring(item) == Config.CuffKeyItem or tostring(item) == Config.CutTieItem then
+            Wait(2000)
+            if cuffitem then DeleteEntity(cuffitem) cuffitem = nil end
+            isHandcuffed = false
+            isEscorted = false
+            TriggerEvent('hospital:client:isEscorted', isEscorted)
+            DetachEntity(ped, true, false)
+            DeleteEntity(cuffitem)
+            TriggerServerEvent("police:server:SetHandcuffStatus", false)
+            ClearPedTasksImmediately(ped)
+            TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
+            QBCore.Functions.Notify(Lang:t("success.uncuffed"),"success")
+        end
     end
 end)
 
-RegisterNetEvent('police:client:GetTied', function(playerId, isSoftcuff)
+RegisterNetEvent('police:client:GetUnCuffed', function(item)
+    if item ~= Config.CutCuffItem then return end
     local ped = PlayerPedId()
-
-    if not isHandcuffed then
-        isHandcuffed = true
-        TriggerServerEvent("police:server:SetHandcuffStatus", true)
-        ClearPedTasksImmediately(ped)
-        if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then
-            SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true)
-        end
-        if not isSoftcuff then
-            cuffType = 16
-            GetCuffedAnimation(playerId)
-            QBCore.Functions.Notify(Lang:t("info.tied"), 'primary')
-        else
-            cuffType = 49
-            GetCuffedAnimation(playerId)
-            QBCore.Functions.Notify(Lang:t("info.cuffed_walk"), 'primary')
-        end
-    else
-        isHandcuffed = false
-        isEscorted = false
-        TriggerEvent('hospital:client:isEscorted', isEscorted)
-        DetachEntity(ped, true, false)
-        TriggerServerEvent("police:server:SetHandcuffStatus", false)
-        ClearPedTasksImmediately(ped)
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
-        QBCore.Functions.Notify(Lang:t("success.untied"),"success")
-    end
-end)
-
-RegisterNetEvent('police:client:setEscortStatus', function(bool)
-    isEscortingPlayer = bool
+    isHandcuffed = false
+    isEscorted = false
+    TriggerEvent('hospital:client:isEscorted', isEscorted)
+    DetachEntity(ped, true, false)
+    DeleteEntity(cuffitem)
+    TriggerServerEvent("police:server:SetHandcuffStatus", false)
+    ClearPedTasksImmediately(ped)
+    TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
+    QBCore.Functions.Notify(Lang:t("success.uncuffed"),"success")
 end)
 
 -- Threads
@@ -526,9 +576,9 @@ CreateThread(function()
             EnableControlAction(0, 249, true) -- Added for talking while cuffed
             EnableControlAction(0, 46, true)  -- Added for talking while cuffed
 
-            if (not IsEntityPlayingAnim(PlayerPedId(), "mp_arresting", "idle", 3) and not IsEntityPlayingAnim(PlayerPedId(), "mp_arrest_paired", "crook_p2_back_right", 3)) and not QBCore.Functions.GetPlayerData().metadata["isdead"] then
-                loadAnimDict("mp_arresting")
-                TaskPlayAnim(PlayerPedId(), "mp_arresting", "idle", 8.0, -8, -1, cuffType, 0, 0, 0, 0)
+            if (not IsEntityPlayingAnim(PlayerPedId(), animDict, animName, 3) and not IsEntityPlayingAnim(PlayerPedId(), "mp_arrest_paired", "crook_p2_back_right", 3)) and not QBCore.Functions.GetPlayerData().metadata["isdead"] then
+                loadAnimDict(animDict)
+                TaskPlayAnim(PlayerPedId(), animDict, animName, 8.0, -8, -1, cuffType, 0, 0, 0, 0)
             end
         end
         if not isHandcuffed and not isEscorted then
@@ -547,22 +597,9 @@ exports['qb-target']:AddGlobalPlayer({
         },
         {
             type = "client",
-            event = "police:client:TiePlayer",
-            icon = 'fas fa-user-lock',
-            label = 'Tie / Untie Player',
-        },
-        {
-            type = "client",
             event = "police:client:KidnapPlayer",
             icon = 'fas fa-user-group',
             label = 'Kidnap Player',
-        },
-        {
-            type = "client",
-            event = 'police:client:CuffPlayer',
-            icon = 'fas fa-user-lock',
-            label = 'Cuff',
-            jobType = 'leo'
         },
         {
             type = "client",

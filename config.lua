@@ -11,8 +11,16 @@ Config.Objects = {
 Config.MaxSpikes = 5
 
 Config.HandCuffItem = 'handcuffs'
+Config.CuffKeyItem = "cuffkeys"
 Config.TieItem = 'ziptie'
-Config.KnifeItem = 'weapon_knife'
+Config.CutTieItem = 'flush_cutter'
+Config.CutCuffItem = 'bolt_cutter'
+Config.BrokenCuffItem = 'broken_handcuffs'
+
+Config.CuffItems = {
+    ['handcuffs'] = {itemname = "handcuffs", propname = "p_cs_cuffs_02_s", needkey = true, keyitem = "cuffkeys" },
+    ['ziptie'] = {itemname = "ziptie", propname = "hei_prop_zip_tie_positioned", needkey = false, keyitem = "flush_cutter"}
+}
 
 Config.LicenseRank = 2
 Config.BlockWallThermals = true -- true/false; lowers thermal cam intensity to stop penetration through walls or tunnels

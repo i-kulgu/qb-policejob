@@ -7,6 +7,7 @@ local FingerDrops = {}
 local Objects = {}
 local QBCore = exports['qb-core']:GetCoreObject()
 local updatingCops = false
+local CuffedPlayers = {}
 
 -- Functions
 local function UpdateBlips()
@@ -254,16 +255,6 @@ QBCore.Commands.Add("seizecash", Lang:t("commands.seizecash"), {}, false, functi
     local Player = QBCore.Functions.GetPlayer(src)
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
         TriggerClientEvent("police:client:SeizeCash", src)
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.on_duty_police_only"), 'error')
-    end
-end)
-
-QBCore.Commands.Add("sc", Lang:t("commands.softcuff"), {}, false, function(source)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
-        TriggerClientEvent("police:client:CuffPlayerSoft", src)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.on_duty_police_only"), 'error')
     end
@@ -519,11 +510,39 @@ QBCore.Commands.Add('911p', Lang:t("commands.police_report"), {{name='message', 
 end)
 
 -- Items
-QBCore.Functions.CreateUseableItem("handcuffs", function(source)
+for _,v in pairs(Config.CuffItems) do
+    QBCore.Functions.CreateUseableItem(v.itemname , function(source,item)
+        local src = source
+        local Player = QBCore.Functions.GetPlayer(src)
+        -- if Player.Functions.RemoveItem(item.name, 1) then
+            TriggerClientEvent("police:client:CuffPlayer", src, item.name)
+        -- end
+        if v.needkey then Player.Functions.AddItem(Config.CuffKeyItem, 1) end
+    end)
+end
+
+QBCore.Functions.CreateUseableItem(Config.CuffKeyItem , function(source,item)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if not Player.Functions.GetItemByName("handcuffs") then return end
-    TriggerClientEvent("police:client:CuffPlayerSoft", src)
+    -- if Player.Functions.RemoveItem(item.name, 1) then
+        TriggerClientEvent("police:client:UnCuffPlayer", src, item.name)
+    -- end
+end)
+
+QBCore.Functions.CreateUseableItem(Config.CutTieItem , function(source,item)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    -- if Player.Functions.RemoveItem(item.name, 1) then
+        TriggerClientEvent("police:client:UnCuffPlayer", src, item.name)
+    -- end
+end)
+
+QBCore.Functions.CreateUseableItem(Config.CutCuffItem , function(source,item)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    -- if Player.Functions.RemoveItem(item.name, 1) then
+        TriggerClientEvent('police:client:useCuffCutter', src, item.name)
+    -- end
 end)
 
 QBCore.Functions.CreateUseableItem("moneybag", function(source, item)
@@ -672,19 +691,47 @@ RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
     TriggerClientEvent('QBCore:Notify', src, Lang:t("success.impound_vehicle_removed"), 'success')
 end)
 
-RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff)
+RegisterNetEvent('police:server:CuffPlayer', function(position, id, item)
     local src = source
     local playerPed = GetPlayerPed(src)
-    local targetPed = GetPlayerPed(playerId)
+    local targetPed = GetPlayerPed(id)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+    if #(playerCoords - targetCoords) > 2.5 then DropPlayer(src, "Attempted exploit abuse") end
 
     local Player = QBCore.Functions.GetPlayer(src)
-    local CuffedPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not Player or not CuffedPlayer or (not Player.Functions.GetItemByName("handcuffs") and (Player.PlayerData.job.name ~= "police" or Player.PlayerData.job.type ~= "leo")) then return end
+    local CuffedPlayer = QBCore.Functions.GetPlayer(id)
+    if not Player or not CuffedPlayer or not Player.Functions.GetItemByName(item) then return end
+    TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, position, item)
+end)
 
-    TriggerClientEvent("police:client:GetCuffed", CuffedPlayer.PlayerData.source, Player.PlayerData.source, isSoftcuff)
+QBCore.Functions.CreateCallback('police:server:getCuffStatus', function(_, cb, playerid)
+    local Player = QBCore.Functions.GetPlayer(playerid)
+    local citizenid = Player.PlayerData.citizenid
+    if CuffedPlayers[citizenid] then
+        cb(CuffedPlayers[citizenid])
+        return
+    else
+        cb(false)
+    end
+end)
+
+RegisterNetEvent('police:server:CutCuffs', function(id, item)
+    local src = source
+    local playerPed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(id)
+    local playerCoords = GetEntityCoords(playerPed)
+    local targetCoords = GetEntityCoords(targetPed)
+    if #(playerCoords - targetCoords) > 2.5 then DropPlayer(src, "Attempted exploit abuse") end
+
+    local Player = QBCore.Functions.GetPlayer(src)
+    local CuffedPlayer = QBCore.Functions.GetPlayer(id)
+    local citizenid = CuffedPlayer.PlayerData.citizenid
+    local cuffed = CuffedPlayers[citizenid].cuffed
+    if not Player or not CuffedPlayer or not Player.Functions.GetItemByName(item) or not cuffed then return end
+    if Player.Functions.AddItem(Config.BrokenCuffItem, 1) then
+        TriggerClientEvent('police:client:GetUnCuffed', CuffedPlayer.PlayerData.source, item)
+    end
 end)
 
 RegisterNetEvent('police:server:TiePlayer', function(playerId, isSoftcuff)
@@ -827,11 +874,17 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
     exports['futte-newspaper']:CreateJailStory(name, time)
 end)
 
-RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
+RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed, cuffitem, position)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
+    local citizenid = Player.PlayerData.citizenid
     if Player then
         Player.Functions.SetMetaData("ishandcuffed", isHandcuffed)
+        if isHandcuffed then
+            CuffedPlayers[citizenid] = {cuffed = true, item = cuffitem, pos = position}
+        else
+            CuffedPlayers[citizenid] = nil
+        end
     end
 end)
 
