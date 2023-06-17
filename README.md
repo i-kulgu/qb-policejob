@@ -32,6 +32,12 @@ v1.3.0
 - You can ziptie players and cut it with flush cutter
 - Illegals can use bolt cutter to cut the cuffs and will get broken cuffs
 
+v1.3.1
+- When used cuff, you'll get cuff key and cuffs will be removed
+- When you use keys, it will be removed and give you cuffs again
+- Added vehicle livery menu
+- Added prices for police vehicles
+
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
 - Citizen ID based armory (Whitelisted)
