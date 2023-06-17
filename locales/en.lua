@@ -35,7 +35,9 @@ local Translations = {
         alradyhaveheli = 'You already have a helicopter!',
         already_cuffed = 'The player is already cuffed!',
         where_looking = 'Where are you looking at ? Stay on the right side!',
-        cant_cut = 'You can\'t open the item with this!'
+        cant_cut = 'You can\'t open the item with this!',
+        not_enough_money = 'You don\'t have enough money on you!',
+        break_out = 'The suspect have broken out from cuffing !'
     },
     success = {
         uncuffed = 'You have been uncuffed',

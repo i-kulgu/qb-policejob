@@ -5,6 +5,7 @@ cuffType = 1
 isEscorted = false
 PlayerJob = {}
 local DutyBlips = {}
+SecKey = nil
 
 -- Functions
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
@@ -80,6 +81,9 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     if Config.BlockWallThermals then
         SeethroughSetMaxThickness(0.25) -- block thermals from seeing through walls; default is 10000.0
     end
+    QBCore.Functions.TriggerCallback('police:server:getSecureKey', function(result)
+        SecKey = result
+    end)
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
@@ -114,6 +118,14 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     end
     PlayerJob = JobInfo
     TriggerServerEvent("police:server:UpdateBlips")
+end)
+
+AddEventHandler('onResourceStart', function(resource)
+   if resource == GetCurrentResourceName() then
+    QBCore.Functions.TriggerCallback('police:server:getSecureKey', function(result)
+        SecKey = result
+    end)
+   end
 end)
 
 RegisterNetEvent('police:client:sendBillingMail', function(amount)

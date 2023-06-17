@@ -172,28 +172,31 @@ local function TakeOutVehicle(vehicleInfo)
             QBCore.Functions.Notify(Lang:t("error.clearspawnpoint"), "error", 4500)
             return
         end
-        QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
-            local veh = NetToVeh(netId)
-            SetCarItemsInfo()
-            SetVehicleNumberPlateText(veh, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
-            SetEntityHeading(veh, coords.w)
-            exports['LegacyFuel']:SetFuel(veh, 100.0)
-            closeMenuFull()
-            if Config.EnableMods then
-                PerformanceUpgradeVehicle(veh)
-            end
-            if Config.EnableExtras then
-                if Config.CarExtras.extras ~= nil then
-                    QBCore.Shared.SetDefaultVehicleExtras(veh, Config.CarExtras.extras)
+        QBCore.Functions.TriggerCallback('police:server:PayForVehicle', function(result)
+            if not result then return QBCore.Functions.Notify(Lang:t('error.not_enough_money'), 'error', 4500) end
+            QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
+                local veh = NetToVeh(netId)
+                SetCarItemsInfo()
+                SetVehicleNumberPlateText(veh, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
+                SetEntityHeading(veh, coords.w)
+                exports['LegacyFuel']:SetFuel(veh, 100.0)
+                closeMenuFull()
+                if Config.EnableMods then
+                    PerformanceUpgradeVehicle(veh)
                 end
-            end
-            PDCar[#PDCar+1] = {veh = veh, model = vehicleInfo}
-            SetVehicleLivery(veh,vehicleInfo.livery)
-            TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-            TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
-            SetVehicleEngineOn(veh, true, true)
-        end, vehicleInfo, coords, true)
+                if Config.EnableExtras then
+                    if Config.CarExtras.extras ~= nil then
+                        QBCore.Shared.SetDefaultVehicleExtras(veh, Config.CarExtras.extras)
+                    end
+                end
+                PDCar[#PDCar+1] = {veh = veh, model = vehicleInfo.vehicle}
+                SetVehicleLivery(veh,vehicleInfo.livery)
+                TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
+                TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+                TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
+                SetVehicleEngineOn(veh, true, true)
+            end, vehicleInfo.vehicle, coords, true)
+        end,vehicleInfo.price)
     end
 end
 
@@ -243,17 +246,26 @@ local function MenuGarage(currentSelection)
         else
             for _,v in pairs(data.ranks) do
                 if v == PlayerJob.grade.level then
+                    local vehprice, pricetext
+                    if data.price then
+                        vehprice = data.price
+                        pricetext = "- Price : $"..data.price
+                    else
+                        vehprice = 0
+                        pricetext = "- Price : Free"
+                    end
                     vehicleMenu[#vehicleMenu+1] = {
                         header = data.label,
-                        txt = "",
+                        txt = pricetext,
                         params = {
-                            event = "police:client:TakeOutVehicle",
+                            event = "police:client:VehicleSubMenu",
                             args = {
                                 vehicle = veh,
                                 vehlabel = veh,
                                 currentSelection = currentSelection,
                                 livery = data.livery,
-                                out = false
+                                out = false,
+                                price = vehprice
                             }
                         }
                     }
@@ -287,7 +299,6 @@ local function MenuImpound(currentSelection)
         else
             shouldContinue = true
             for _ , v in pairs(result) do
-                QBCore.Debug(v)
                 local enginePercent = QBCore.Shared.Round(v.engine / 10, 0)
                 local currentFuel = v.fuel
                 local vname = QBCore.Shared.Vehicles[v.vehicle].name
@@ -319,6 +330,55 @@ local function MenuImpound(currentSelection)
         end
     end)
 
+end
+
+local function syncVehicle(entity)
+	SetVehicleModKit(entity, 0)
+	if entity ~= 0 and DoesEntityExist(entity) then
+		if not NetworkHasControlOfEntity(entity) then
+			NetworkRequestControlOfEntity(entity)
+			local timeout = 2000
+			while timeout > 0 and not NetworkHasControlOfEntity(entity) do
+				Wait(100)
+				timeout = timeout - 100
+			end
+		end
+		if not IsEntityAMissionEntity(entity) then
+			SetEntityAsMissionEntity(entity, true, true)
+			local timeout = 2000
+			while timeout > 0 and not IsEntityAMissionEntity(entity) do
+				Wait(100)
+				timeout = timeout - 100
+			end
+		end
+	end
+end
+
+local function getVehicleLiveries(vehicle)
+    local validMods = {}
+    if GetNumVehicleMods(vehicle, 48) == 0 and GetVehicleLiveryCount(vehicle) ~= 0 then
+        oldlivery = true
+        for i = 0, GetVehicleLiveryCount(vehicle)-1 do
+            if i ~= 0 then validMods[i] = { id = i, name = "Livery "..i } end
+        end
+    else
+        oldlivery = false
+        for i = 1, GetNumVehicleMods(vehicle, 48) do
+            local modName = GetLabelText(GetModTextLabel(vehicle, 48, (i - 1)))
+            validMods[i] = { id = (i - 1), name = modName }
+        end
+    end
+    return validMods
+end
+
+local function getVehicleExtras(vehicle)
+    local validExtras = {}
+    for i=1, 21, 1 do
+        if DoesExtraExist(vehicle, i) then
+            validExtras[i] = {id = i}
+        end
+    end
+    return validExtras
 end
 
 --NUI Callbacks
@@ -466,19 +526,17 @@ RegisterNetEvent('police:client:VehicleSubMenu', function(data)
         SubMenu[#SubMenu+1] = {header = 'Return '..data.vehlabel, txt = "", params = {event = "police:client:ReturnVehicle", args = {car = data.car}}}
         table.remove(PDCar, data.tableid)
     else
-        SubMenu[#SubMenu+1] = {header = 'Take out '..data.vehlabel, txt = "", params = {event = "police:client:TakeOutVehicle", args = {vehicle = data.vehicle, currentSelection = data.currentSelection, livery = data.livery}}}
+        SubMenu[#SubMenu+1] = {header = 'Take out '..data.vehlabel, txt = "Take out for $"..data.price, params = {event = "police:client:TakeOutVehicle", args = {vehicle = data.vehicle, currentSelection = data.currentSelection, livery = data.livery, price = data.price}}}
     end
     exports['qb-menu']:openMenu(SubMenu)
 end)
 
 RegisterNetEvent('police:client:TakeOutVehicle', function(data)
     if Config.UseTarget then
-        local vehicle = data.vehicle
-        TakeOutVehicle(vehicle)
+        TakeOutVehicle(data)
     else
         if inGarage then
-            local vehicle = data.vehicle
-            TakeOutVehicle(vehicle)
+            TakeOutVehicle(data)
         end
     end
 end)
@@ -621,6 +679,81 @@ RegisterNetEvent('qb-police:client:openTrash', function()
         slots = 300,
     })
     TriggerEvent("inventory:client:SetCurrentStash", "policetrash")
+end)
+
+RegisterNetEvent('policejob:client:VehicleLiveryMenu', function(data)
+    local vehicle = data.vehicle
+    local liveries = getVehicleLiveries(vehicle)
+    local LiveryMenu = {}
+    LiveryMenu[#LiveryMenu+1] = {header = "Choose your livery", txt = '', isMenuHeader = true}
+    LiveryMenu[#LiveryMenu+1] = {header = '', txt = '❌ Close'}
+    for k,v in pairs(liveries) do
+        LiveryMenu[#LiveryMenu+1] = {header = v.name, txt = 'Change livery to '.. v.name, params = {event = 'police:client:ChangeLivery', args = {id = v.id}}}
+    end
+    exports['qb-menu']:openMenu(LiveryMenu)
+end)
+
+RegisterNetEvent('police:client:ChangeLivery', function(data)
+    if IsPedInAnyVehicle(PlayerPedId(), false) then	vehicle = GetVehiclePedIsIn(PlayerPedId(), false) syncVehicle(vehicle) end
+    if oldlivery then
+		if modName == "NULL" then modName = "old" end
+		if GetVehicleLivery(vehicle) == tonumber(data.id) then
+            QBCore.Functions.Notify(data.id.." already installed", "error")
+			return
+		end
+	else
+		if modName == "NULL" then modName = "Stock" end
+		if GetVehicleMod(vehicle, 48) == tonumber(data.id) then
+            QBCore.Functions.Notify(modName.." already installed", "error")
+			return
+		end
+	end
+	if oldlivery then
+		if tonumber(data.id) == 0 then
+			SetVehicleMod(vehicle, 48, -1, false)
+			SetVehicleLivery(vehicle, 0)
+		else
+			SetVehicleMod(vehicle, 48, -1, false)
+			SetVehicleLivery(vehicle, tonumber(data.id))
+		end
+	elseif not oldlivery then
+		if tonumber(data.id) == -1 then
+			SetVehicleMod(vehicle, 48, -1, false)
+			SetVehicleLivery(vehicle, -1)
+		else
+			SetVehicleMod(vehicle, 48, tonumber(data.id), false)
+			SetVehicleLivery(vehicle, -1)
+		end
+	end
+    local data = {}
+    data.vehicle = vehicle
+    TriggerEvent('policejob:client:VehicleLiveryMenu', data)
+end)
+
+RegisterNetEvent('policejob:client:VehicleExtrasMenu', function(data)
+    local vehicle = data.vehicle
+    local extras = getVehicleExtras(vehicle)
+    local ExtraMenu = {}
+    ExtraMenu[#ExtraMenu+1] = {header = 'Extras Menu', txt = 'Change your vehicle extras', isMenuHeader = true}
+    ExtraMenu[#ExtraMenu+1] = {header = '', txt = '❌ Close'}
+    for k,v in pairs(extras) do
+        ExtraMenu[#ExtraMenu+1] = {header = 'Extra '.. v.id, txt = 'Change extra option '.. v.id, params = {event = 'police:client:ChangeExtra', args = {id = v.id, veh = vehicle}}}
+    end
+    exports['qb-menu']:openMenu(ExtraMenu)
+end)
+
+RegisterNetEvent('police:client:ChangeExtra', function(data)
+    local veh = GetVehiclePedIsIn(PlayerPedId(), false)
+    if IsVehicleExtraTurnedOn(veh, data.id) then
+        SetVehicleExtra(veh, data.id, 1)
+        QBCore.Functions.Notify('Extra '.. data.id ..' has been deactivated', 'error', 2500)
+    else
+        SetVehicleExtra(veh, data.id, 0)
+        QBCore.Functions.Notify('Extra '.. data.id ..' has been activated', 'success', 2500)
+    end
+    local data = {}
+    data.vehicle = veh
+    TriggerEvent('policejob:client:VehicleExtrasMenu', data)
 end)
 
 --##### Threads #####--
@@ -1364,4 +1497,22 @@ CreateThread(function()
             exports['qb-core']:HideText()
         end
     end)
+end)
+
+
+RegisterCommand('liverymenu', function()
+    if not PlayerJob.type == "leo" then QBCore.Functions.Notify("You can't use this menu..", "error") return end
+    local vehicle = nil
+	if IsPedInAnyVehicle(PlayerPedId(), false) then	
+        vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+        syncVehicle(vehicle)
+    else
+        QBCore.Functions.Notify("You need to be in a car!", "error")
+        return
+    end
+    LiveryMenu = {}
+    LiveryMenu[#LiveryMenu+1] = {header = "Livery Menu", txt = "", isMenuHeader = true }
+    LiveryMenu[#LiveryMenu+1] = {header = "Change Liveries", txt = "Change your vehicle liveries", params= {event = 'policejob:client:VehicleLiveryMenu', args = {vehicle = vehicle}}}
+    LiveryMenu[#LiveryMenu+1] = {header = "Change Extras", txt = "Change your vehicle extras", params= {event = 'policejob:client:VehicleExtrasMenu', args = {vehicle = vehicle}}}
+    exports['qb-menu']:openMenu(LiveryMenu)
 end)

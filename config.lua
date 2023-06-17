@@ -16,6 +16,7 @@ Config.TieItem = 'ziptie'
 Config.CutTieItem = 'flush_cutter'
 Config.CutCuffItem = 'bolt_cutter'
 Config.BrokenCuffItem = 'broken_handcuffs'
+Config.BreakOutCuffing = true
 
 Config.CuffItems = {
     ['handcuffs'] = {itemname = "handcuffs", propname = "p_cs_cuffs_02_s", needkey = true, keyitem = "cuffkeys" },
@@ -153,28 +154,28 @@ Config.CarExtras = { -- Extra options to be enabled / disabled
 Config.AuthorizedVehicles = {
     -- Garage 1 vehicles (LSPD)
     [1] = {
-        ["police"] = {label = "Police Car 1", ranks = {1,2}, livery = 1},
-        ["police2"] = {label = "Police Car 2", ranks = {1,2}, livery = 1},
-        ["police3"] = {label = "Police Car 3", ranks = {3}, livery = 1},
-        ["police4"] = {label = "Police Car 4", ranks = {3}, livery = 1},
-        ["policeb"] = {label = "Police Car 5", ranks = {3,4}, livery = 1},
-        ["policet"] = {label = "Police Car 6", ranks = {3,4}, livery = 1},
-        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1},
-        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1},
+        ["police"] = {label = "Police Car 1", ranks = {1,2}, livery = 1, price = 10},
+        ["police2"] = {label = "Police Car 2", ranks = {1,2}, livery = 1, price = 10},
+        ["police3"] = {label = "Police Car 3", ranks = {3}, livery = 1, price = 10},
+        ["police4"] = {label = "Police Car 4", ranks = {3}, livery = 1, price = 10},
+        ["policeb"] = {label = "Police Car 5", ranks = {3,4}, livery = 1, price = 10},
+        ["policet"] = {label = "Police Car 6", ranks = {3,4}, livery = 1, price = nil},
+        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1, price = 15},
+        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1, price = nil},
     },
     -- Garage 2 vehicles (BCSO)
     [2] = {
-        ["sheriff"] = {label = "Sheriff Car 1", ranks = {1,2}, livery = 1},
-        ["sheriff2"] = {label = "Sheriff Car 2", ranks = {2,3,4}, livery = 1},
-        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1},
-        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1},
+        ["sheriff"] = {label = "Sheriff Car 1", ranks = {1,2}, livery = 1, price = 10},
+        ["sheriff2"] = {label = "Sheriff Car 2", ranks = {2,3,4}, livery = 1, price = 10},
+        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1, price = 10},
+        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1, price = nil},
     },
     -- Garage 1 vehicles (Sandy)
     [3] = {
-        ["sheriff"] = {label = "Sheriff Car 1", ranks = {1,2}, livery = 1},
-        ["sheriff2"] = {label = "Sheriff Car 2", ranks = {2,3,4}, livery = 1},
-        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1},
-        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1},
+        ["sheriff"] = {label = "Sheriff Car 1", ranks = {1,2}, livery = 1, price = 10},
+        ["sheriff2"] = {label = "Sheriff Car 2", ranks = {2,3,4}, livery = 1, price = 10},
+        ["fbi"] = {label = "Unmarked FBI", ranks = {3,4}, livery = 1, price = 10},
+        ["fbi2"] = {label = "Unmarked FBI2", ranks = {3,4}, livery = 1, price = nil},
     },
 }
 

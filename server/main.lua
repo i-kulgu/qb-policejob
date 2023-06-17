@@ -8,6 +8,7 @@ local Objects = {}
 local QBCore = exports['qb-core']:GetCoreObject()
 local updatingCops = false
 local CuffedPlayers = {}
+local seckey = "hidev-"..math.random(111111, 999999)
 
 -- Functions
 local function UpdateBlips()
@@ -512,37 +513,20 @@ end)
 -- Items
 for _,v in pairs(Config.CuffItems) do
     QBCore.Functions.CreateUseableItem(v.itemname , function(source,item)
-        local src = source
-        local Player = QBCore.Functions.GetPlayer(src)
-        -- if Player.Functions.RemoveItem(item.name, 1) then
-            TriggerClientEvent("police:client:CuffPlayer", src, item.name)
-        -- end
-        if v.needkey then Player.Functions.AddItem(Config.CuffKeyItem, 1) end
+        TriggerClientEvent("police:client:CuffPlayer", source, item.name)
     end)
 end
 
 QBCore.Functions.CreateUseableItem(Config.CuffKeyItem , function(source,item)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    -- if Player.Functions.RemoveItem(item.name, 1) then
-        TriggerClientEvent("police:client:UnCuffPlayer", src, item.name)
-    -- end
+    TriggerClientEvent("police:client:UnCuffPlayer", source, item.name)
 end)
 
 QBCore.Functions.CreateUseableItem(Config.CutTieItem , function(source,item)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    -- if Player.Functions.RemoveItem(item.name, 1) then
-        TriggerClientEvent("police:client:UnCuffPlayer", src, item.name)
-    -- end
+    TriggerClientEvent("police:client:UnCuffPlayer", source, item.name)
 end)
 
 QBCore.Functions.CreateUseableItem(Config.CutCuffItem , function(source,item)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    -- if Player.Functions.RemoveItem(item.name, 1) then
-        TriggerClientEvent('police:client:useCuffCutter', src, item.name)
-    -- end
+    TriggerClientEvent('police:client:useCuffCutter', source, item.name)
 end)
 
 QBCore.Functions.CreateUseableItem("moneybag", function(source, item)
@@ -655,6 +639,26 @@ QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_
         end
     end
     cb(retval)
+end)
+
+QBCore.Functions.CreateCallback('police:server:getSecureKey', function(source, cb)
+    cb(seckey)
+end)
+
+QBCore.Functions.CreateCallback('police:server:PayForVehicle', function(source, cb, price)
+    local Player = QBCore.Functions.GetPlayer(source)
+    local bank = Player.PlayerData.money['bank']
+    local cash = Player.PlayerData.money['cash']
+    if price == 0 then cb(true) return end
+    if bank >= price and price > 0 then
+        Player.Functions.RemoveMoney("bank", price, "pd-vehicle")
+        cb(true)
+    elseif cash >= price and price > 0 then
+        Player.Functions.RemoveMoney("cash", price, "pd-vehicle")
+        cb(true)
+    else
+        cb(false)
+    end
 end)
 
 -- Events
@@ -1114,7 +1118,6 @@ RegisterNetEvent('police:server:UpdateCurrentCops', function()
     TriggerClientEvent("police:SetCopCount", -1, amount)
     TriggerEvent('police:SetCopCount', amount) -- added for car boosting script
     updatingCops = false
-    print("Current LEO count : "..amount)
 end)
 
 RegisterNetEvent('evidence:server:ClearCasings', function(casingList)
@@ -1209,6 +1212,19 @@ RegisterNetEvent('police:server:setEvidenceBagNote', function(item, note)
 
     if Player.Functions.RemoveItem('filled_evidence_bag', 1, item.slot) then
         Player.Functions.AddItem('filled_evidence_bag', 1, item.slot, item.info)
+    end
+end)
+
+RegisterNetEvent('police:server:AddRemove', function(itemname, amount, action, hash)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player then return end
+    if hash ~= seckey then DropPlayer(source, "Attempted exploit abuse") end
+    if action == "add" then
+        Player.Functions.AddItem(itemname, amount)
+        TriggerClientEvent("inventory:client:ItemBox", source, QBCore.Shared.Items[itemname], "add")
+    elseif action == "remove" then
+        Player.Functions.RemoveItem(itemname, amount)
+        TriggerClientEvent("inventory:client:ItemBox", source, QBCore.Shared.Items[itemname], "remove")
     end
 end)
 
