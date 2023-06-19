@@ -126,7 +126,7 @@ RegisterNetEvent('police:client:RobPlayer', function()
     if player ~= -1 and distance < 2.5 then
         local playerPed = GetPlayerPed(player)
         local playerId = GetPlayerServerId(player)
-        if IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or IsTargetDead(playerId) then
+       if IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "anim@move_m@prisoner_cuffed", "idle", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or IsTargetDead(playerId) then
             QBCore.Functions.Progressbar("robbing_player", Lang:t("progressbar.robbing"), math.random(5000, 7000), false, true, {
                 disableMovement = true,
                 disableCarMovement = true,
@@ -489,6 +489,7 @@ RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
             end
         end
         if position == "front" then
+            cuffType = Config.CuffItems[item].cufftype
             animName = "idle"
             animDict = "anim@move_m@prisoner_cuffed"
             loadAnimDict(animDict)
@@ -497,6 +498,7 @@ RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
             CreateHandCuff(prop, PlayerPedId())
             AttachEntityToEntity(cuffitem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 60309), -0.058, 0.005, 0.090, 290.0, 95.0, 120.0, true, false, false, false, 0, true)
         else
+            cuffType = Config.CuffItems[item].cufftype
             animName = "idle"
             animDict = "mp_arresting"
             loadAnimDict(animDict)
