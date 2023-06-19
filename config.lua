@@ -20,7 +20,7 @@ Config.BreakOutCuffing = true
 
 Config.CuffItems = {
     ['handcuffs'] = {itemname = "handcuffs", propname = "p_cs_cuffs_02_s", needkey = true, keyitem = "cuffkeys" },
-    ['ziptie'] = {itemname = "ziptie", propname = "hei_prop_zip_tie_positioned", needkey = false, keyitem = "flush_cutter"}
+    ['ziptie'] = {itemname = "ziptie", propname = "ba_prop_battle_cuffs", needkey = false, keyitem = "flush_cutter"}
 }
 
 Config.LicenseRank = 2
