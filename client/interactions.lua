@@ -489,6 +489,7 @@ RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
             end
         end
         if position == "front" then
+            cuffType = 49
             animName = "idle"
             animDict = "anim@move_m@prisoner_cuffed"
             loadAnimDict(animDict)
@@ -497,6 +498,7 @@ RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
             CreateHandCuff(prop, PlayerPedId())
             AttachEntityToEntity(cuffitem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 60309), -0.058, 0.005, 0.090, 290.0, 95.0, 120.0, true, false, false, false, 0, true)
         else
+            cuffType = 49
             animName = "idle"
             animDict = "mp_arresting"
             loadAnimDict(animDict)
