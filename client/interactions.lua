@@ -626,6 +626,20 @@ exports['qb-target']:AddGlobalPlayer({
             label = 'Escort',
             jobType = 'leo'
         },
+        {
+            type = "client",
+            event = 'police:client:CuffPlayer',
+            icon = 'fas fa-user-group',
+            label = 'cuff',
+            jobType = 'leo'
+        },
+        {
+            type = "client",
+            event = 'police:client:UnCuffPlayer',
+            icon = 'fas fa-user-group',
+            label = 'Un cuff',
+            jobType = 'leo'
+        },
     },
     distance = 2.5,
 })
