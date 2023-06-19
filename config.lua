@@ -18,9 +18,14 @@ Config.CutCuffItem = 'bolt_cutter'
 Config.BrokenCuffItem = 'broken_handcuffs'
 Config.BreakOutCuffing = true
 
-Config.CuffItems = {
-    ['handcuffs'] = {itemname = "handcuffs", propname = "p_cs_cuffs_02_s", needkey = true, keyitem = "cuffkeys" },
-    ['ziptie'] = {itemname = "ziptie", propname = "ba_prop_battle_cuffs", needkey = false, keyitem = "flush_cutter"}
+-- itemname = name of the item
+-- propname = the prop used for cuffing
+-- needkey = does the cuff needs a key to uncuff ? It will give a key when true
+-- keyitem = what is the item used to uncuff
+-- cufftype = the animation type. 19 - ped is freezed / 49 - ped can move with cuffs
+Config.CuffItems = { 
+    ['handcuffs'] = {itemname = "handcuffs", propname = "p_cs_cuffs_02_s", needkey = true, keyitem = "cuffkeys", cufftype = 19 },
+    ['ziptie'] = {itemname = "ziptie", propname = "ba_prop_battle_cuffs", needkey = false, keyitem = "flush_cutter", cufftype = 49}
 }
 
 Config.LicenseRank = 2
