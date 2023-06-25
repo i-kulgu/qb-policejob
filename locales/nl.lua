@@ -129,7 +129,7 @@ local Translations = {
         target_location = 'De locatie van %{firstname} %{lastname} is gemarkeerd op je kaart',
         anklet_location = 'Enkelband locatie',
         new_call = 'Nieuwe oproep',
-        officer_down = 'Officier %{achternaam} | %{roepnaam} omlaag',
+        officer_down = 'Officier %{lastname} | %{callsign} omlaag',
         fine_issued = 'Er is met succes een boete opgelegd aan de overtreder',
         received_fine = 'De Staatsschuldinvordering heeft de verschuldigde boetes automatisch geïncasseerd...'
     },
