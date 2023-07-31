@@ -218,12 +218,8 @@ end)
 
 RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
     local Player = QBCore.Functions.GetPlayerData()
-    exports['ps-dispatch']:OfficerDown()
-end)
-
-RegisterNetEvent('police:client:SendPoliceEmergencyAlert2', function()
-    local Player = QBCore.Functions.GetPlayerData()
-    exports['ps-dispatch']:OfficerDown2()
+    TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {lastname = Player.charinfo.lastname, callsign = Player.metadata.callsign}))
+    TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = Player.charinfo.lastname, callsign = Player.metadata.callsign}))
 end)
 
 -- Threads
@@ -238,4 +234,3 @@ CreateThread(function()
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
     end
-end)
