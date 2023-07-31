@@ -11,13 +11,20 @@ SecKey = nil
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
     local blip = GetBlipFromEntity(ped)
+    local pedinvehicle = IsPedInAnyVehicle(ped)
     if not DoesBlipExist(blip) then
         if NetworkIsPlayerActive(playerId) then
             blip = AddBlipForEntity(ped)
         else
             blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
         end
-        SetBlipSprite(blip, 1)
+        if pedinvehicle then
+            SetBlipSprite(blip, 812)
+            ShowHeadingIndicatorOnBlip(blip, false)
+        else
+            SetBlipSprite(blip, 1)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        end
         ShowHeadingIndicatorOnBlip(blip, true)
         SetBlipRotation(blip, math.ceil(playerLocation.w))
         SetBlipScale(blip, 1.0)
@@ -167,7 +174,7 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text)
     local street1name = GetStreetNameFromHashKey(street1)
     local street2name = GetStreetNameFromHashKey(street2)
     QBCore.Functions.Notify({text = text, caption = street1name.. ' ' ..street2name}, 'police')
-    PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
+    TriggerServerEvent("InteractSound_SV:PlayOnSource", "panicbutton", 0.2)
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     local blip2 = AddBlipForCoord(coords.x, coords.y, coords.z)
@@ -211,8 +218,12 @@ end)
 
 RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
     local Player = QBCore.Functions.GetPlayerData()
-    TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {lastname = Player.charinfo.lastname, callsign = Player.metadata.callsign}))
-    TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = Player.charinfo.lastname, callsign = Player.metadata.callsign}))
+    exports['ps-dispatch']:OfficerDown()
+end)
+
+RegisterNetEvent('police:client:SendPoliceEmergencyAlert2', function()
+    local Player = QBCore.Functions.GetPlayerData()
+    exports['ps-dispatch']:OfficerDown2()
 end)
 
 -- Threads
