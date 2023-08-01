@@ -11,13 +11,20 @@ SecKey = nil
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
     local blip = GetBlipFromEntity(ped)
+    local pedinvehicle = IsPedInAnyVehicle(ped)
     if not DoesBlipExist(blip) then
         if NetworkIsPlayerActive(playerId) then
             blip = AddBlipForEntity(ped)
         else
             blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
         end
-        SetBlipSprite(blip, 1)
+        if pedinvehicle then
+            SetBlipSprite(blip, 812)
+            ShowHeadingIndicatorOnBlip(blip, false)
+        else
+            SetBlipSprite(blip, 1)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        end
         ShowHeadingIndicatorOnBlip(blip, true)
         SetBlipRotation(blip, math.ceil(playerLocation.w))
         SetBlipScale(blip, 1.0)
@@ -227,4 +234,3 @@ CreateThread(function()
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
     end
-end)
