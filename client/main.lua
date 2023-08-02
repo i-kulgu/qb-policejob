@@ -234,3 +234,4 @@ CreateThread(function()
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
     end
+end)
