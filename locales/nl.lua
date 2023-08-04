@@ -57,7 +57,7 @@ local Translations = {
         impounded = 'Voertuig in beslag genomen',
         beingonduty = 'Je bent nu indienst',
         beingoffduty = 'Je bent nu uit dienst',
- },
+    },
     info = {
         mr = 'Dhr.',
         mrs = 'Mevr.',
@@ -131,7 +131,11 @@ local Translations = {
         new_call = 'Nieuwe oproep',
         officer_down = 'Officier %{lastname} | %{callsign} omlaag',
         fine_issued = 'Er is met succes een boete opgelegd aan de overtreder',
-        received_fine = 'De Staatsschuldinvordering heeft de verschuldigde boetes automatisch geïncasseerd...'
+        received_fine = 'De Staatsschuldinvordering heeft de verschuldigde boetes automatisch geïncasseerd...',
+        unknown = 'Onbekend',
+        tow_vehicle = 'Sleep voertuig',
+        select_for_examine_b = 'Straat: %{street}<br>Label: %{label}<br>Slot: %{slot}',
+        input_impound_price = 'Sleep prijs'
     },
     evidence = {
         red_hands = 'Rode handen',
@@ -148,6 +152,12 @@ local Translations = {
         heavy_alcohol = 'Ruikt erg naar alcohol',
         agitated = 'Geagiteerd - tekenen van methgebruik',
         serial_not_visible = 'Serienummer niet zichtbaar...',
+        examine_menu_blood_h = 'Bloed',
+        examine_menu_blood_b = 'Door het bloed te onderzoeken kunt u de dna-code en bloedgroep van de persoon achterhalen',
+        examine_menu_casing_h = 'Behuizing',
+        examine_menu_casing_b = 'Door de kogelhuls te onderzoeken, kunt u het model en serienummer van het wapen bepalen',
+        examine_menu_fingerprint_b = 'Vingerafdruk',
+        examine_menu_fingerprint_h = 'Door het bewijsmateriaal te onderzoeken en de vingerafdruk-ID van de persoon te identificeren'
     },
     menu = {
         garage_title = 'Politie voertuigen',
@@ -165,7 +175,13 @@ local Translations = {
         dty_beonduty = 'Meld u aan voor dienst',
         dty_beoffduty = 'Meld u af voor dienst',
         spawn_heli = 'Helikopter nemen',
-        remove_heli = 'Helikopter verwijderen'
+        remove_heli = 'Helikopter verwijderen',
+        evd_research = 'Onderzoek het bewijs',
+        tow_menu_header_b = 'Voertuig: %{vehicle} <br>Kenteken:%{plate}',
+        tow_menu_depot_h = 'Depot',
+        tow_menu_depot_b = 'U kunt de auto in beslag nemen en een bekeuring uitschrijven',
+        tow_menu_impound_h = 'in beslag nemen',
+        tow_menu_impound_b = 'U kunt het voertuig naar de in beslag genomen garages in het politiegebouw sturen en een bekeuring uitschrijven',
     },
     email = {
         sender = 'Centraal Justitieel incasso Bureau',
@@ -212,6 +228,8 @@ local Translations = {
         place_object = 'object aan het plaatsen..',
         remove_object = 'object verwijden..',
         impound = 'Voertuig in beslag nemen..',
+        researchevidence = 'Bewijs inspecteren',
+        examining = 'Onderzoeken %{label}'
     },
 }
 
