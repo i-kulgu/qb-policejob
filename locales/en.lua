@@ -37,7 +37,8 @@ local Translations = {
         where_looking = 'Where are you looking at ? Stay on the right side!',
         cant_cut = 'You can\'t open the item with this!',
         not_enough_money = 'You don\'t have enough money on you!',
-        break_out = 'The suspect have broken out from cuffing !'
+        break_out = 'The suspect have broken out from cuffing !',
+        dont_have_evidence_bag = 'You don\'t have evidence bag',
     },
     success = {
         uncuffed = 'You have been uncuffed',
@@ -57,7 +58,7 @@ local Translations = {
         impounded = 'Vehicle impounded',
         beingonduty = 'You\'re on duty',
         beingoffduty = 'You\'re off duty',
- },
+    },
     info = {
         mr = 'Mr.',
         mrs = 'Mrs.',
@@ -82,7 +83,7 @@ local Translations = {
         tow_driver_paid = 'You paid the tow truck driver',
         paid_lawyer = 'You paid a lawyer',
         vehicle_taken_depot = 'Vehicle taken into depot for $%{price}',
-        vehicle_seized = 'Vehicle seized',
+        vehicle_seized = 'Vehicle seized into impound for $%{price}',
         stolen_money = 'You have stolen $%{stolen}',
         cash_robbed = 'You have been robbed of $%{money}',
         driving_license_confiscated = 'Your driving license has been confiscated',
@@ -98,7 +99,7 @@ local Translations = {
         bill = 'Bill',
         amount = 'Amount',
         police_plate = 'LSPD', --Should only be 4 characters long
-        vehicle_info = 'Engine: %{value} % | Fuel: %{value2} %',
+        vehicle_info = 'Bill: $%{billvalue}<br>Engine: %{value} % | Fuel: %{value2} %',
         evidence_stash = 'Evidence Stash | %{value}',
         slot = 'Slot no (1,2,3)',
         current_evidence = 'Stash #%{value} | Drawer #%{value2}',
@@ -131,7 +132,11 @@ local Translations = {
         new_call = 'New Call',
         officer_down = 'Officer %{lastname} | %{callsign} Down',
         fine_issued = 'Fine has been issued to offender succesfully',
-        received_fine = 'State Debt Recovery has automatically recovered the fines owed...'
+        received_fine = 'State Debt Recovery has automatically recovered the fines owed...',
+        unknown = 'Unknown',
+        tow_vehicle = 'Tow vehicle',
+        select_for_examine_b = 'Street: %{street}<br>Label: %{label}<br>Slot: %{slot}',
+        input_impound_price = 'Tow price'
     },
     evidence = {
         red_hands = 'Red hands',
@@ -148,10 +153,17 @@ local Translations = {
         heavy_alcohol = 'Smells very much like alcohol',
         agitated = 'Agitated - Signs of Meth Use',
         serial_not_visible = 'Serial number not visible...',
+        examine_menu_blood_h = 'Blood',
+        examine_menu_blood_b = 'By examining the blood you can find out the person\'s dna code and blood group',
+        examine_menu_casing_h = 'Casing',
+        examine_menu_casing_b = 'By examining the bullet casing you can determine the model and serial number of the weapon',
+        examine_menu_fingerprint_b = 'Fingerprint',
+        examine_menu_fingerprint_h = 'By examining the evidence and identifying the person\'s fingerprint id'
     },
     menu = {
         garage_title = 'Police Vehicles',
         close = '⬅ Close Menu',
+        close_x = 'Close the menu',
         impound = 'Impounded Vehicles',
         pol_impound = 'Police Impound',
         pol_garage = 'Police Garage',
@@ -165,7 +177,13 @@ local Translations = {
         dty_beonduty = 'Sign to on duty',
         dty_beoffduty = 'Sign to off duty',
         spawn_heli = 'Spawn Helicopter',
-        remove_heli = 'Remove Helicopter'
+        remove_heli = 'Remove Helicopter',
+        evd_research = 'Research the evidence',
+        tow_menu_header_b = 'Vehicle: %{vehicle} <br>Plate:%{plate}',
+        tow_menu_depot_h = 'Depot',
+        tow_menu_depot_b = 'You can send the car to impound garages and can write a ticket',
+        tow_menu_impound_h = 'Impound',
+        tow_menu_impound_b = 'You can send the vehicle to the impound garages in the police building and can write a ticket',
     },
     email = {
         sender = 'Central Judicial Collection Agency',
@@ -212,6 +230,8 @@ local Translations = {
         place_object = 'Placing object..',
         remove_object = 'Removing object..',
         impound = 'Impounding Vehicle..',
+        researchevidence = 'Inspecting evidence',
+        examining = 'Examining %{label}'
     },
 }
 

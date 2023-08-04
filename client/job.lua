@@ -13,6 +13,7 @@ local HeliPed = {}
 local Heli = nil
 local PDCar = {}
 
+
 local function loadAnimDict(dict) -- interactions, job,
     while (not HasAnimDictLoaded(dict)) do
         RequestAnimDict(dict)
@@ -127,7 +128,7 @@ local function TakeOutImpound(vehicle)
                 SetVehicleNumberPlateText(veh, vehicle.plate)
                 SetVehicleDirtLevel(veh, 0.0)
                 SetEntityHeading(veh, coords.w)
-                exports['LegacyFuel']:SetFuel(veh, vehicle.fuel)
+                exports[Config.FuelScript]:SetFuel(veh, vehicle.fuel)
                 doCarDamage(veh, vehicle)
                 TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
                 closeMenuFull()
@@ -179,7 +180,7 @@ local function TakeOutVehicle(vehicleInfo)
                 SetCarItemsInfo()
                 SetVehicleNumberPlateText(veh, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
                 SetEntityHeading(veh, coords.w)
-                exports['LegacyFuel']:SetFuel(veh, 100.0)
+                exports[Config.FuelScript]:SetFuel(veh, 100.0)
                 closeMenuFull()
                 if Config.EnableMods then
                     PerformanceUpgradeVehicle(veh)
@@ -285,13 +286,14 @@ local function MenuGarage(currentSelection)
     exports['qb-menu']:openMenu(vehicleMenu)
 end
 
+
 local function MenuImpound(currentSelection)
     local impoundMenu = {
         {
             header = Lang:t('menu.impound'),
             isMenuHeader = true
         }
-    }
+    } 
     QBCore.Functions.TriggerCallback("police:GetImpoundedVehicles", function(result)
         local shouldContinue = false
         if result == nil then
@@ -305,18 +307,18 @@ local function MenuImpound(currentSelection)
 
                 impoundMenu[#impoundMenu+1] = {
                     header = vname.." ["..v.plate.."]",
-                    txt =  Lang:t('info.vehicle_info', {value = enginePercent, value2 = currentFuel}),
+                    txt =  Lang:t('info.vehicle_info', {billvalue = v.depotprice, value = enginePercent, value2 = currentFuel}),
                     params = {
                         event = "police:client:TakeOutImpound",
                         args = {
                             vehicle = v,
+                            price = v.depotprice,
                             currentSelection = currentSelection
                         }
                     }
                 }
             end
         end
-
 
         if shouldContinue then
             impoundMenu[#impoundMenu+1] = {
@@ -329,7 +331,6 @@ local function MenuImpound(currentSelection)
             exports['qb-menu']:openMenu(impoundMenu)
         end
     end)
-
 end
 
 local function syncVehicle(entity)
@@ -381,6 +382,35 @@ local function getVehicleExtras(vehicle)
     return validExtras
 end
 
+local function ClearHeadshots()
+    for i = 1, 32 do
+        if IsPedheadshotValid(i) then
+            UnregisterPedheadshot(i)
+        end
+    end
+end
+
+local function GetHeadshot()
+    ClearHeadshots()
+    local ped = PlayerPedId()
+
+    if not DoesEntityExist(ped) then
+        return false
+    end
+
+    local handle, timer = RegisterPedheadshot(ped), GetGameTimer() + 5000
+    while not IsPedheadshotReady(handle) or not IsPedheadshotValid(handle) do
+        Wait(50)
+        if GetGameTimer() >= timer then
+            return false
+        end
+    end
+
+    local txd = GetPedheadshotTxdString(handle)
+    local url = string.format("https://nui-img/%s/%s", txd, txd)
+    return url
+end
+
 --NUI Callbacks
 RegisterNUICallback('closeFingerprint', function(_, cb)
     SetNuiFocus(false, false)
@@ -394,10 +424,13 @@ RegisterNetEvent('police:client:showFingerprint', function(playerId)
     FingerPrintSessionId = playerId
 end)
 
-RegisterNetEvent('police:client:showFingerprintId', function(fid)
+RegisterNetEvent('police:client:showFingerprintId', function(fid, name, cid)
     SendNUIMessage({
         type = "updateFingerprintId",
-        fingerprintId = fid
+        Fingerprint = fid,
+        Name = name,
+        Citizenid = cid,
+        Headshot = GetHeadshot()
     })
     PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0, 0, 1)
 end)
@@ -434,49 +467,66 @@ RegisterNetEvent('police:client:CallAnim', function()
     end)
 end)
 
-RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
-    local vehicle = QBCore.Functions.GetClosestVehicle()
-    local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
-    local engineDamage = math.ceil(GetVehicleEngineHealth(vehicle))
-    local totalFuel = exports['LegacyFuel']:GetFuel(vehicle)
-    if vehicle ~= 0 and vehicle then
-        local ped = PlayerPedId()
-        local pos = GetEntityCoords(ped)
-        local vehpos = GetEntityCoords(vehicle)
-        if #(pos - vehpos) < 5.0 and not IsPedInAnyVehicle(ped) then
-           QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
-                disableMovement = true,
-                disableCarMovement = true,
-                disableMouse = false,
-                disableCombat = true,
-            }, {
-                animDict = 'missheistdockssetup1clipboard@base',
-                anim = 'base',
-                flags = 1,
-            }, {
-                model = 'prop_notepad_01',
-                bone = 18905,
-                coords = { x = 0.1, y = 0.02, z = 0.05 },
-                rotation = { x = 10.0, y = 0.0, z = 0.0 },
-            },{
-                model = 'prop_pencil_01',
-                bone = 58866,
-                coords = { x = 0.11, y = -0.02, z = 0.001 },
-                rotation = { x = -120.0, y = 0.0, z = 0.0 },
-            }, function() -- Play When Done
-                local plate = QBCore.Functions.GetPlate(vehicle)
-                TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
-                while NetworkGetEntityOwner(vehicle) ~= 128 do  -- Ensure we have entity ownership to prevent inconsistent vehicle deletion
-                    NetworkRequestControlOfEntity(vehicle)
-                    Wait(100)
-                end
-                QBCore.Functions.DeleteVehicle(vehicle)
-                TriggerEvent('QBCore:Notify', Lang:t('success.impounded'), 'success')
-                ClearPedTasks(ped)
-            end, function() -- Play When Cancel
-                ClearPedTasks(ped)
-                TriggerEvent('QBCore:Notify', Lang:t('error.canceled'), 'error')
-            end)
+RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound)
+    local dialog = exports['qb-input']:ShowInput({
+        header = Lang:t('info.tow_vehicle'),
+        submitText = "Confirm",
+        inputs = {
+            {
+                text = Lang:t('info.amount'), -- text you want to be displayed as a place holder
+                name = "price", -- name of the input should be unique otherwise it might override
+                type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
+                isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
+                default = 0, -- Default number option, this is optional
+            }
+        }
+    })
+
+    if dialog then
+        local vehicle = QBCore.Functions.GetClosestVehicle()
+        local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
+        local engineDamage = math.ceil(GetVehicleEngineHealth(vehicle))
+        local totalFuel = exports[Config.FuelScript]:GetFuel(vehicle)
+        local price = dialog.price
+        if vehicle ~= 0 and vehicle then
+            local ped = PlayerPedId()
+            local pos = GetEntityCoords(ped)
+            local vehpos = GetEntityCoords(vehicle)
+            if #(pos - vehpos) < 5.0 and not IsPedInAnyVehicle(ped) then
+               QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
+                    disableMovement = true,
+                    disableCarMovement = true,
+                    disableMouse = false,
+                    disableCombat = true,
+                }, {
+                    animDict = 'missheistdockssetup1clipboard@base',
+                    anim = 'base',
+                    flags = 1,
+                }, {
+                    model = 'prop_notepad_01',
+                    bone = 18905,
+                    coords = { x = 0.1, y = 0.02, z = 0.05 },
+                    rotation = { x = 10.0, y = 0.0, z = 0.0 },
+                },{
+                    model = 'prop_pencil_01',
+                    bone = 58866,
+                    coords = { x = 0.11, y = -0.02, z = 0.001 },
+                    rotation = { x = -120.0, y = 0.0, z = 0.0 },
+                }, function() -- Play When Done
+                    local plate = QBCore.Functions.GetPlate(vehicle)
+                    TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
+                    while NetworkGetEntityOwner(vehicle) ~= 128 do  -- Ensure we have entity ownership to prevent inconsistent vehicle deletion
+                        NetworkRequestControlOfEntity(vehicle)
+                        Wait(100)
+                    end
+                    QBCore.Functions.DeleteVehicle(vehicle)
+                    TriggerEvent('QBCore:Notify', Lang:t('success.impounded'), 'success')
+                    ClearPedTasks(ped)
+                end, function() -- Play When Cancel
+                    ClearPedTasks(ped)
+                    TriggerEvent('QBCore:Notify', Lang:t('error.canceled'), 'error')
+                end)
+            end
         end
     end
 end)
@@ -514,8 +564,14 @@ end)
 
 RegisterNetEvent('police:client:TakeOutImpound', function(data)
     if inImpound then
-        local vehicle = data.vehicle
-        TakeOutImpound(vehicle)
+        QBCore.Functions.TriggerCallback('police:server:HasImpoundPrice', function(success)
+            if success then
+                local vehicle = data.vehicle
+                TakeOutImpound(vehicle)
+            else
+                QBCore.Functions.Notify(Lang:t('error.not_enough_money'), 'error')
+            end
+        end, data.price)
     end
 end)
 
@@ -655,7 +711,7 @@ RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
             SetVehicleMod(veh, 0, 48)
             SetVehicleNumberPlateText(veh, "ZULU"..tostring(math.random(1000, 9999)))
             SetEntityHeading(veh, coords.w)
-            exports['LegacyFuel']:SetFuel(veh, 100.0)
+            exports[Config.FuelScript]:SetFuel(veh, 100.0)
             closeMenuFull()
             TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
             TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
@@ -756,6 +812,113 @@ RegisterNetEvent('police:client:ChangeExtra', function(data)
     data.vehicle = veh
     TriggerEvent('policejob:client:VehicleExtrasMenu', data)
 end)
+
+RegisterNetEvent('police:client:TowMenu', function(Vehicle, Plate)
+    local Model = GetDisplayNameFromVehicleModel(GetEntityModel(Vehicle))
+    local ModelBrand = QBCore.Shared.Vehicles[string.lower(Model)].brand
+    local ModelName = QBCore.Shared.Vehicles[string.lower(Model)].name
+
+    exports['qb-menu']:openMenu({
+        {
+            header = Lang:t('info.tow_vehicle'),
+            txt = Lang:t('info.tow_menu_header_b', {vehicle= ModelBrand..' '..ModelName, plate= Plate}),
+            isMenuHeader = true,
+            params = { }
+        },
+        {
+            header = Lang:t('menu.tow_menu_depot_h'),
+            txt = Lang:t('menu.tow_menu_depot_b'),
+            icon = 'fa-solid fa-truck-pickup',
+            params = {
+                event = 'police:client:Tow',
+                args = {
+                    type = 'depot',
+                    plate = Plate,
+                    model = ModelName,
+		            vehicle = Vehicle
+                }
+            }
+        },
+        {
+            header = Lang:t('menu.tow_menu_impound_h'),
+            txt = Lang:t('menu.tow_menu_impound_b'),
+            icon = 'fa-solid fa-shield',
+            params = {
+                event = 'police:client:Tow',
+                args = {
+                    type = 'impound',
+                    plate = Plate,
+                    model = ModelName,
+		            vehicle = Vehicle
+                }
+            }
+        },
+        {
+            header = Lang:t('menu.close_x'),
+            icon = 'fa-solid fa-xmark'
+        }
+    })
+end)
+
+RegisterNetEvent('police:client:Tow', function(Data)
+    local dialog = exports['qb-input']:ShowInput({
+        header = Lang:t('info.tow_vehicle'),
+        submitText = "Confirm",
+        inputs = {
+            {
+                text = Lang:t('info.amount'), -- text you want to be displayed as a place holder
+                name = "price", -- name of the input should be unique otherwise it might override
+                type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
+                isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
+                default = 0, -- Default number option, this is optional
+            }
+        }
+    })
+
+    if dialog then
+        local Vehicle = Data.vehicle
+        local Plate = Data.plate
+        local bodyDamage = math.ceil(GetVehicleBodyHealth(Vehicle))
+        local engineDamage = math.ceil(GetVehicleEngineHealth(Vehicle))
+        local totalFuel = exports[Config.FuelScript]:GetFuel(Vehicle)
+
+        if Data.type == 'impound' then Full = true else Full = false end
+
+        QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
+            disableMovement = true,
+            disableCarMovement = true,
+            disableMouse = false,
+            disableCombat = true,
+        }, {
+            animDict = 'missheistdockssetup1clipboard@base',
+            anim = 'base',
+            flags = 1,
+        }, {
+            model = 'prop_notepad_01',
+            bone = 18905,
+            coords = { x = 0.1, y = 0.02, z = 0.05 },
+            rotation = { x = 10.0, y = 0.0, z = 0.0 },
+        },{
+            model = 'prop_pencil_01',
+            bone = 58866,
+            coords = { x = 0.11, y = -0.02, z = 0.001 },
+            rotation = { x = -120.0, y = 0.0, z = 0.0 },
+        }, function() -- Play When Done
+            TriggerServerEvent("police:server:Impound", Plate, Full, dialog.price, bodyDamage, engineDamage, totalFuel)
+            while NetworkGetEntityOwner(Vehicle) ~= 128 do  -- Ensure we have entity ownership to prevent inconsistent vehicle deletion
+                NetworkRequestControlOfEntity(Vehicle)
+                Wait(100)
+            end
+            QBCore.Functions.DeleteVehicle(Vehicle)
+            TriggerEvent('QBCore:Notify', Lang:t('success.impounded'), 'success')
+            ClearPedTasks(PlayerPedId())
+        end, function() -- Play When Cancel
+            ClearPedTasks(PlayerPedId())
+            TriggerEvent('QBCore:Notify', Lang:t('error.canceled'), 'error')
+        end)
+    end
+end)
+
 
 --##### Threads #####--
 
@@ -902,10 +1065,39 @@ local function impound()
         while true do
             Wait(0)
             if inImpound and PlayerJob.type == "leo" then
-                if PlayerJob.onduty then sleep = 5 end
                 if IsPedInAnyVehicle(PlayerPedId(), false) then
                     if IsControlJustReleased(0, 38) then
-                        QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(PlayerPedId()))
+                        local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+                        local Plate = QBCore.Functions.GetPlate(Vehicle)
+                        local bodyDamage = math.ceil(GetVehicleBodyHealth(Vehicle))
+                        local engineDamage = math.ceil(GetVehicleEngineHealth(Vehicle))
+                        local totalFuel = exports[Config.FuelScript]:GetFuel(Vehicle)
+
+                        local dialog = exports['qb-input']:ShowInput({
+                            header = Lang:t('info.input_impound_price'),
+                            submitText = "Confirm",
+                            inputs = {
+                                {
+                                    text = Lang:t('info.amount'), -- text you want to be displayed as a place holder
+                                    name = "price", -- name of the input should be unique otherwise it might override
+                                    type = "number", -- type of the input - number will not allow non-number characters in the field so only accepts 0-9
+                                    isRequired = true, -- Optional [accepted values: true | false] but will submit the form if no value is inputted
+                                    default = 0, -- Default number option, this is optional
+                                }
+                            }
+                        })
+
+                        if dialog then
+                            TaskLeaveVehicle(PlayerPedId(), Vehicle, 0)
+                            Wait(1000)
+                            TriggerServerEvent("police:server:Impound", Plate, true, dialog.price, bodyDamage, engineDamage, totalFuel)
+                            while NetworkGetEntityOwner(Vehicle) ~= 128 do  -- Ensure we have entity ownership to prevent inconsistent vehicle deletion
+                                NetworkRequestControlOfEntity(Vehicle)
+                                Wait(100)
+                            end
+                            QBCore.Functions.DeleteVehicle(Vehicle)
+                            TriggerEvent('QBCore:Notify', Lang:t('success.impounded'), 'success')
+                        end
                         break
                     end
                 end
@@ -1182,6 +1374,33 @@ if Config.UseTarget then
                 distance = 1.5,
             })
         end
+
+        for k, v in pairs(Config.Locations["labs"]) do
+            exports['qb-target']:AddBoxZone("PoliceLabs"..k, vector3(v.x,v.y,v.z), 0.8, 0.6, {
+                name = "PoliceLabs"..k, heading=v.w, debugPoly=false, minZ=v.z - 2, maxZ=v.z + 2,}, {
+                options = {{
+                    type = "client",
+                    event = "police:client:FindEvidenceBag",
+                    label = Lang:t("menu.evd_research"),
+                    icon = 'fa-solid fa-flask-vial',
+                    jobType = "leo"}},
+                distance = 1.5,
+            })
+        end
+
+        exports['qb-target']:AddTargetBone('seat_dside_f', {
+        options = {{
+            icon = 'fa-solid fa-car-burst',
+            label = Lang:t("info.tow_vehicle"),
+            action = function() 
+                local Vehicle = QBCore.Functions.GetClosestVehicle()
+                local Plate = QBCore.Functions.GetPlate(Vehicle)
+                TriggerEvent('police:client:TowMenu', Vehicle, Plate)
+            end,
+            jobType = 'leo',
+            }},
+            distance = 2.5
+        })
 
     end)
 
@@ -1467,30 +1686,28 @@ CreateThread(function()
     impoundCombo:onPlayerInOut(function(isPointInside, point)
         if isPointInside then
             inImpound = true
-            if PlayerJob.type == "leo" and PlayerJob.onduty then
-                if IsPedInAnyVehicle(PlayerPedId(), false) then
-                    exports['qb-core']:DrawText(Lang:t('info.impound_veh'), 'left')
-                    impound()
-                else
-                    local currentSelection = 0
+            if PlayerJob.type == "leo" and PlayerJob.onduty and IsPedInAnyVehicle(PlayerPedId(), false) then
+                exports['qb-core']:DrawText(Lang:t('info.impound_veh'), 'left')
+                impound()
+            else
+                local currentSelection = 0
 
-                    for k, v in pairs(Config.Locations["impound"]) do
-                        if #(point - vector3(v.x, v.y, v.z)) < 4 then
-                            currentSelection = k
-                        end
+                for k, v in pairs(Config.Locations["impound"]) do
+                    if #(point - vector3(v.x, v.y, v.z)) < 4 then
+                        currentSelection = k
                     end
-                    exports['qb-menu']:showHeader({
-                        {
-                            header = Lang:t('menu.pol_impound'),
-                            params = {
-                                event = 'police:client:ImpoundMenuHeader',
-                                args = {
-                                    currentSelection = currentSelection,
-                                }
+                end
+                exports['qb-menu']:showHeader({
+                    {
+                        header = Lang:t('menu.pol_impound'),
+                        params = {
+                            event = 'police:client:ImpoundMenuHeader',
+                            args = {
+                                currentSelection = currentSelection,
                             }
                         }
-                    })
-                end
+                    }
+                })
             end
         else
             inImpound = false

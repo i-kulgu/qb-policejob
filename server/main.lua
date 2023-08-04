@@ -326,7 +326,7 @@ QBCore.Commands.Add("plateinfo", Lang:t("commands.plateinfo"), {{name = "plate",
     end
 end)
 
-QBCore.Commands.Add("depot", Lang:t("commands.depot"), {{name = "price", help = Lang:t('info.impound_price')}}, false, function(source, args)
+QBCore.Commands.Add("depot", Lang:t("commands.depot"), {}, false, function(source)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
@@ -599,8 +599,9 @@ QBCore.Functions.CreateCallback('police:GetDutyPlayers', function(_, cb)
 end)
 
 QBCore.Functions.CreateCallback('police:GetImpoundedVehicles', function(_, cb)
+    local Player = QBCore.Functions.GetPlayer(_)
     local vehicles = {}
-    MySQL.query('SELECT * FROM player_vehicles WHERE state = ?', {2}, function(result)
+    MySQL.query('SELECT * FROM player_vehicles WHERE state = ? AND citizenid = ?', {2, Player.PlayerData.citizenid}, function(result)
         if result[1] then
             vehicles = result
         end
@@ -661,6 +662,55 @@ QBCore.Functions.CreateCallback('police:server:PayForVehicle', function(source, 
     end
 end)
 
+QBCore.Functions.CreateCallback('police:server:getCuffStatus', function(_, cb, playerid)
+    local Player = QBCore.Functions.GetPlayer(playerid)
+    local citizenid = Player.PlayerData.citizenid
+    if CuffedPlayers[citizenid] then
+        cb(CuffedPlayers[citizenid])
+        return
+    else
+        cb(false)
+    end
+end)
+
+QBCore.Functions.CreateCallback('police:server:GetEvidenceByType', function(source, cb, type)
+    local Player = QBCore.Functions.GetPlayer(source)
+    local EvidenceBags = exports[Config.Inventory]:GetItemsByName(source, 'filled_evidence_bag')
+
+    local ItemList = {}
+    
+    for k,v in pairs(EvidenceBags) do
+        if v.info.type == type then
+            if type == 'casing' then
+                if v.info.serie == 'Unknown' then
+                    ItemList[#ItemList+1] = v
+                end
+            elseif type == 'blood' then
+                if v.info.dnalabel == 'Unknown' then
+                    ItemList[#ItemList+1] = v
+                end
+            elseif type == 'fingerprint' then
+                if v.info.fingerprint == 'Unknown' then
+                    ItemList[#ItemList+1] = v
+                end
+            end
+        end
+    end
+
+    if ItemList[1] then
+        cb(ItemList)
+    end
+end)
+
+QBCore.Functions.CreateCallback('police:server:HasImpoundPrice', function(source, cb, amount)
+    local Player = QBCore.Functions.GetPlayer(source)
+    
+    if Player.Functions.RemoveMoney('cash', amount, 'police-impound') then
+        cb(true)
+    end
+    cb(false)
+end)
+
 -- Events
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
@@ -707,17 +757,6 @@ RegisterNetEvent('police:server:CuffPlayer', function(position, id, item)
     local CuffedPlayer = QBCore.Functions.GetPlayer(id)
     if not Player or not CuffedPlayer or not Player.Functions.GetItemByName(item) then return end
     TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, position, item)
-end)
-
-QBCore.Functions.CreateCallback('police:server:getCuffStatus', function(_, cb, playerid)
-    local Player = QBCore.Functions.GetPlayer(playerid)
-    local citizenid = Player.PlayerData.citizenid
-    if CuffedPlayers[citizenid] then
-        cb(CuffedPlayers[citizenid])
-        return
-    else
-        cb(false)
-    end
 end)
 
 RegisterNetEvent('police:server:CutCuffs', function(id, item)
@@ -1022,9 +1061,9 @@ RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, bo
             TriggerClientEvent('QBCore:Notify', src, Lang:t("info.vehicle_taken_depot", {price = price}))
         else
             MySQL.query(
-                'UPDATE player_vehicles SET state = ?, body = ?, engine = ?, fuel = ? WHERE plate = ?',
-                {2, body, engine, fuel, plate})
-            TriggerClientEvent('QBCore:Notify', src, Lang:t("info.vehicle_seized"))
+                'UPDATE player_vehicles SET state = ?, depotprice = ?, body = ?, engine = ?, fuel = ? WHERE plate = ?',
+                {2, price, body, engine, fuel, plate})
+            TriggerClientEvent('QBCore:Notify', src, Lang:t("info.vehicle_seized", {price = price}))
         end
     end
 end)
@@ -1153,8 +1192,10 @@ RegisterNetEvent('police:server:showFingerprintId', function(sessionId)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local fid = Player.PlayerData.metadata["fingerprint"]
-    TriggerClientEvent('police:client:showFingerprintId', sessionId, fid)
-    TriggerClientEvent('police:client:showFingerprintId', src, fid)
+    local cid = Player.PlayerData.citizenid
+    local name = Player.PlayerData.charinfo.firstname..' '..Player.PlayerData.charinfo.lastname
+    TriggerClientEvent('police:client:showFingerprintId', sessionId, fid, name, cid)
+    TriggerClientEvent('police:client:showFingerprintId', src, fid, name, cid)
 end)
 
 RegisterNetEvent('police:server:SetTracker', function(targetId)
@@ -1225,6 +1266,26 @@ RegisterNetEvent('police:server:AddRemove', function(itemname, amount, action, h
     elseif action == "remove" then
         Player.Functions.RemoveItem(itemname, amount)
         TriggerClientEvent("inventory:client:ItemBox", source, QBCore.Shared.Items[itemname], "remove")
+    end
+end)
+
+RegisterNetEvent('police:server:UpdateEvidenceBag', function(Item, Slot)
+    local Player = QBCore.Functions.GetPlayer(source)
+
+    if Item then
+        if Item.info.type == 'casing' then
+            Item.info.serie = Item.info.serie2
+            Item.info.ammotype = Item.info.ammotype2
+        elseif Item.info.type == 'blood' then
+            Item.info.dnalabel = Item.info.dnalabel2
+            Item.info.bloodtype = Item.info.bloodtype2
+        elseif Item.info.type == 'fingerprint' then
+            Item.info.fingerprint = Item.info.fingerprint2
+        end
+    end
+
+    if Player.Functions.RemoveItem('filled_evidence_bag', 1, Slot) then
+        Player.Functions.AddItem('filled_evidence_bag', 1, Slot, Item.info)
     end
 end)
 

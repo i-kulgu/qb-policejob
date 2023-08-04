@@ -218,6 +218,111 @@ AddEventHandler("CEventGunShot", function(witnesses, ped)
     end
 end)
 
+RegisterNetEvent('police:client:FindEvidenceBag', function()
+    local PlayerData = QBCore.Functions.GetPlayerData()
+    exports['qb-menu']:openMenu({
+        {
+            header = PlayerData.job.label,
+            txt = '',
+            icon = 'fa-solid fa-microscope',
+            isMenuHeader = true,
+            params = {
+                event = '',
+                args = {}
+            }
+        },
+        {
+            header = Lang:t('evidence.examine_menu_blood_h'),
+            txt = Lang:t('evidence.examine_menu_blood_b'),
+            icon = 'fa-solid fa-droplet',
+            params = {
+                event = 'police:client:SelectEvidence',
+                args = {
+		            type = 'blood',
+                    label = 'Blood',
+                    icon = 'fa-solid fa-droplet'
+                }
+            }
+        },
+        {
+            header = Lang:t('evidence.examine_menu_casing_h'),
+            txt = Lang:t('evidence.examine_menu_casing_b'),
+            icon = 'fa-solid fa-joint',
+            params = {
+                event = 'police:client:SelectEvidence',
+                args = {
+		            type = 'casing',
+                    label = 'Bullet casing',
+                    icon = 'fa-solid fa-joint'
+                }
+            }
+        },
+        {
+            header = Lang:t('evidence.examine_menu_fingerprint_b'),
+            txt = Lang:t('evidence.examine_menu_fingerprint_h'),
+            icon = 'fa-solid fa-fingerprint',
+            params = {
+                event = 'police:client:SelectEvidence',
+                args = {
+		            type = 'fingerprint',
+                    label = 'Fingerprint',
+                    icon = 'fa-solid fa-fingerprint',
+                }
+            }
+        },
+        {
+            header = Lang:t('menu.close_x'),
+            icon = 'fa-solid fa-xmark'
+        }
+    })
+end)
+
+RegisterNetEvent('police:client:SelectEvidence', function(Data)
+    QBCore.Functions.TriggerCallback('police:server:GetEvidenceByType', function(List)
+        if List == nil then
+            QBCore.Functions.Notify(Lang:t('error.dont_have_evidence_bag'), 'error')
+        else
+            local EvidenceBagsMenu = {{
+                header = Data.label..' evidences',
+                icon = Data.icon,
+                isMenuHeader = true
+            }}
+
+            for l, n in pairs(List) do
+                if n.info.serie == 'Unknown' then 
+                    EvidenceBagsMenu[#EvidenceBagsMenu+1] = {
+                        header = n.label,
+                        txt = Lang:t('info.select_for_examine_b', {street = n.info.street, label= n.info.label, slot=n.slot}),
+                        params  = {
+                            event = 'police:client:ExamineEvidenceBag',
+                            args = {
+                                Item = n,
+                                slot = n.slot
+                            }
+                        }
+                    }
+                end
+            end
+
+            EvidenceBagsMenu[#EvidenceBagsMenu+1] = {
+                header = Lang:t('menu.close_x'),
+                icon = 'fa-solid fa-xmark'
+            } exports['qb-menu']:openMenu(EvidenceBagsMenu)
+        end
+    end, Data.type)
+end)
+
+RegisterNetEvent('police:client:ExamineEvidenceBag', function(Data)
+    QBCore.Functions.Progressbar('examine_evidence_bag', Lang:t('progressbar.examining', {label = Data.Item.info.label}), 5000, false, false, {
+        disableMovement = true,
+        disableCarMovement = false,
+        disableMouse = false,
+        disableCombat = true
+    }, {}, {}, {}, function() -- Done
+        TriggerServerEvent('police:server:UpdateEvidenceBag', Data.Item, Data.slot)
+    end, function() end)
+end)
+
 -- Threads
 
 CreateThread(function()
@@ -261,8 +366,10 @@ CreateThread(function()
                         type = 'casing',
                         street = streetLabel:gsub("%'", ""),
                         ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[Casings[CurrentCasing].type]['ammotype']],
-                        ammotype = Casings[CurrentCasing].type,
-                        serie = Casings[CurrentCasing].serie
+                        ammotype = Lang:t('info.unknown'),
+                        ammotype2 = Casings[CurrentCasing].type,
+                        serie = Lang:t('info.unknown'),
+                        serie2 = Casings[CurrentCasing].serie
                     }
                     TriggerServerEvent('evidence:server:AddCasingToInventory', CurrentCasing, info)
                 end
@@ -286,8 +393,10 @@ CreateThread(function()
                         label = Lang:t('info.blood'),
                         type = 'blood',
                         street = streetLabel:gsub("%'", ""),
-                        dnalabel = DnaHash(Blooddrops[CurrentBlooddrop].citizenid),
-                        bloodtype = Blooddrops[CurrentBlooddrop].bloodtype
+                        dnalabel = Lang:t('info.unknown'),
+                        dnalabel2 = DnaHash(Blooddrops[CurrentBlooddrop].citizenid),
+                        bloodtype = Lang:t('info.unknown'),
+                        bloodtype2 = Blooddrops[CurrentBlooddrop].bloodtype
                     }
                     TriggerServerEvent('evidence:server:AddBlooddropToInventory', CurrentBlooddrop, info)
                 end
@@ -311,7 +420,8 @@ CreateThread(function()
                         label = Lang:t('info.fingerprint'),
                         type = 'fingerprint',
                         street = streetLabel:gsub("%'", ""),
-                        fingerprint = Fingerprints[CurrentFingerprint].fingerprint
+                        fingerprint = Lang:t('info.unknown'),
+                        fingerprint2 = Fingerprints[CurrentFingerprint].fingerprint
                     }
                     TriggerServerEvent('evidence:server:AddFingerprintToInventory', CurrentFingerprint, info)
                 end
