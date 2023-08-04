@@ -13,6 +13,7 @@ local HeliPed = {}
 local Heli = nil
 local PDCar = {}
 
+
 local function loadAnimDict(dict) -- interactions, job,
     while (not HasAnimDictLoaded(dict)) do
         RequestAnimDict(dict)
@@ -319,7 +320,6 @@ local function MenuImpound(currentSelection)
             end
         end
 
-
         if shouldContinue then
             impoundMenu[#impoundMenu+1] = {
                 header = Lang:t('menu.close'),
@@ -331,7 +331,6 @@ local function MenuImpound(currentSelection)
             exports['qb-menu']:openMenu(impoundMenu)
         end
     end)
-
 end
 
 local function syncVehicle(entity)
@@ -1066,7 +1065,6 @@ local function impound()
         while true do
             Wait(0)
             if inImpound and PlayerJob.type == "leo" then
-                if PlayerJob.onduty then sleep = 5 end
                 if IsPedInAnyVehicle(PlayerPedId(), false) then
                     if IsControlJustReleased(0, 38) then
                         local Vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
