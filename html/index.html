@@ -178,10 +178,12 @@
             }
             .take-fingerprint {
                 position: absolute;
-                height: 12.5vh;
-                width: 10vh;
+                height: 9.8vh;
+                width: 8.2vh;
                 background: rgba(250, 250, 250, 0.45);
-                margin: 0 auto;
+                opacity: 0.5;
+                margin: 0 0 15.1vh 41.1vh;
+                border-radius: 0.7vh;
                 left: 0;
                 right: 0;
                 bottom: 15vh;
@@ -192,20 +194,34 @@
             }
             .fingerprint-id {
                 position: absolute;
-                width: 22vh;
-                height: 13vh;
-                top: 23vh;
+                width: 24vh;
+                height: 42.2vh;
+                top: 14vh;
                 margin: 0 auto;
-                left: 0;
+                left: -115px;
                 right: 0;
                 text-align: center;
-                padding-top: 2vh;
+                /* padding-top: 2vh; */
                 font-family: 'Roboto Mono';
                 font-weight: bold;
             }
-            .fingerprint-id > p {
-                padding-top: 2vh;
+            .fingerprint-screen {
+                width: 100%;
+                height: 100%;
+                background-color: #0e0e30;
+            }
+            .fingerprint-screen > img {
+                height: 14vh;
+                margin-top: 4vh;
+                border: 1px solid gray;
+                border-radius: 0.33vh;
+            }
+            .fingerprint-screen > p {
+                color: white;
+                font-size: 1.25vh;
                 font-weight: lighter;
+                text-align: start;
+                padding-left: 2.5vh;
             }
         </style>
     </head>
@@ -229,10 +245,7 @@
         <div id="fingerprint">
             <div class="fingerprint-container">
                 <img src="./fingerprint.png" alt="fingerprint" class="fingerprint-frame">
-                <div class="fingerprint-id">
-                    Fingerprint ID
-                    <p>No result</p>
-                </div>
+                <div class="fingerprint-id"> </div>
                 <div class="take-fingerprint"></div>
             </div>
         </div>
