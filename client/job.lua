@@ -520,13 +520,14 @@ RegisterNetEvent('police:client:TakeOutImpound', function(data)
 end)
 
 RegisterNetEvent('police:client:VehicleSubMenu', function(data)
+    local vehLabel = QBCore.Shared.Vehicles[data.vehicle].label
     local SubMenu = {}
-    SubMenu[#SubMenu+1] = {header = data.vehlabel.." Menu", txt = "Take out or return your vehicle", isMenuHeader = true}
+    SubMenu[#SubMenu+1] = {header = vehLabel.." Menu", txt = "Take out or return your vehicle", isMenuHeader = true}
     if data.out then
-        SubMenu[#SubMenu+1] = {header = 'Return '..data.vehlabel, txt = "", params = {event = "police:client:ReturnVehicle", args = {car = data.car}}}
+        SubMenu[#SubMenu+1] = {header = 'Return '..vehLabel, txt = "", params = {event = "police:client:ReturnVehicle", args = {car = data.car}}}
         table.remove(PDCar, data.tableid)
     else
-        SubMenu[#SubMenu+1] = {header = 'Take out '..data.vehlabel, txt = "Take out for $"..data.price, params = {event = "police:client:TakeOutVehicle", args = {vehicle = data.vehicle, currentSelection = data.currentSelection, livery = data.livery, price = data.price}}}
+        SubMenu[#SubMenu+1] = {header = 'Take out '..vehLabel, txt = "Take out for $"..data.price, params = {event = "police:client:TakeOutVehicle", args = {vehicle = data.vehicle, currentSelection = data.currentSelection, livery = data.livery, price = data.price}}}
     end
     exports['qb-menu']:openMenu(SubMenu)
 end)
