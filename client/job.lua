@@ -487,7 +487,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound)
         local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
         local engineDamage = math.ceil(GetVehicleEngineHealth(vehicle))
         local totalFuel = exports[Config.FuelScript]:GetFuel(vehicle)
-        local price = dialog.price
+        if tonumber(dialog.price) < 0 then price = 0 else price = dialog.price end
         if vehicle ~= 0 and vehicle then
             local ped = PlayerPedId()
             local pos = GetEntityCoords(ped)
@@ -821,9 +821,8 @@ RegisterNetEvent('police:client:TowMenu', function(Vehicle, Plate)
     exports['qb-menu']:openMenu({
         {
             header = Lang:t('info.tow_vehicle'),
-            txt = Lang:t('info.tow_menu_header_b', {vehicle= ModelBrand..' '..ModelName, plate= Plate}),
+            txt = Lang:t('menu.tow_menu_header_b', {vehicle= ModelBrand..' '..ModelName, plate= Plate}),
             isMenuHeader = true,
-            params = { }
         },
         {
             header = Lang:t('menu.tow_menu_depot_h'),
@@ -881,7 +880,7 @@ RegisterNetEvent('police:client:Tow', function(Data)
         local bodyDamage = math.ceil(GetVehicleBodyHealth(Vehicle))
         local engineDamage = math.ceil(GetVehicleEngineHealth(Vehicle))
         local totalFuel = exports[Config.FuelScript]:GetFuel(Vehicle)
-
+        if tonumber(dialog.price) < 0 then price = 0 else price = dialog.price end
         if Data.type == 'impound' then Full = true else Full = false end
 
         QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
@@ -904,7 +903,7 @@ RegisterNetEvent('police:client:Tow', function(Data)
             coords = { x = 0.11, y = -0.02, z = 0.001 },
             rotation = { x = -120.0, y = 0.0, z = 0.0 },
         }, function() -- Play When Done
-            TriggerServerEvent("police:server:Impound", Plate, Full, dialog.price, bodyDamage, engineDamage, totalFuel)
+            TriggerServerEvent("police:server:Impound", Plate, Full, price, bodyDamage, engineDamage, totalFuel)
             while NetworkGetEntityOwner(Vehicle) ~= 128 do  -- Ensure we have entity ownership to prevent inconsistent vehicle deletion
                 NetworkRequestControlOfEntity(Vehicle)
                 Wait(100)
@@ -1088,9 +1087,10 @@ local function impound()
                         })
 
                         if dialog then
+                            if tonumber(dialog.price) < 0 then price = 0 else price = dialog.price end
                             TaskLeaveVehicle(PlayerPedId(), Vehicle, 0)
                             Wait(1000)
-                            TriggerServerEvent("police:server:Impound", Plate, true, dialog.price, bodyDamage, engineDamage, totalFuel)
+                            TriggerServerEvent("police:server:Impound", Plate, true, price, bodyDamage, engineDamage, totalFuel)
                             while NetworkGetEntityOwner(Vehicle) ~= 128 do  -- Ensure we have entity ownership to prevent inconsistent vehicle deletion
                                 NetworkRequestControlOfEntity(Vehicle)
                                 Wait(100)
