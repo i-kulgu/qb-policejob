@@ -38,6 +38,12 @@ v1.3.1
 - Added vehicle livery menu
 - Added prices for police vehicles
 
+v1.3.2 :
+
+- Added new prop item for zipties
+- Fixed the rob player when cuffed from front
+- Added configurable cufftypes into config where you can choose from wether the player can move with that kind handcuffs or not
+
 v1.3.3
 - Fingerprint UI has been changed
 - Added evidence research option. Police can research filled evidence bags in lab and will see more info about the evidence
