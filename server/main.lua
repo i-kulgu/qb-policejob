@@ -518,11 +518,11 @@ for _,v in pairs(Config.CuffItems) do
 end
 
 QBCore.Functions.CreateUseableItem(Config.CuffKeyItem , function(source,item)
-    TriggerClientEvent("police:client:UnCuffPlayer", source, item.name)
+    TriggerClientEvent("police:client:UnCuffPlayer", source, item.name, source)
 end)
 
 QBCore.Functions.CreateUseableItem(Config.CutTieItem , function(source,item)
-    TriggerClientEvent("police:client:UnCuffPlayer", source, item.name)
+    TriggerClientEvent("police:client:UnCuffPlayer", source, item.name, source)
 end)
 
 QBCore.Functions.CreateUseableItem(Config.CutCuffItem , function(source,item)
@@ -1256,16 +1256,17 @@ RegisterNetEvent('police:server:setEvidenceBagNote', function(item, note)
     end
 end)
 
-RegisterNetEvent('police:server:AddRemove', function(itemname, amount, action, hash)
-    local Player = QBCore.Functions.GetPlayer(source)
+RegisterNetEvent('police:server:AddRemove', function(itemname, amount, action, src, hash)
+    print(src)
+    local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
-    if hash ~= seckey then DropPlayer(source, "Attempted exploit abuse") end
+    if hash ~= seckey then DropPlayer(src, "Attempted exploit abuse") end
     if action == "add" then
         Player.Functions.AddItem(itemname, amount)
-        TriggerClientEvent("inventory:client:ItemBox", source, QBCore.Shared.Items[itemname], "add")
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items[itemname], "add")
     elseif action == "remove" then
         Player.Functions.RemoveItem(itemname, amount)
-        TriggerClientEvent("inventory:client:ItemBox", source, QBCore.Shared.Items[itemname], "remove")
+        TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items[itemname], "remove")
     end
 end)
 

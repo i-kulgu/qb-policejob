@@ -2,6 +2,7 @@
 local isEscorting = false
 local cuffitem, cutteritem = nil, nil
 local animDict, animName = nil, nil
+local cuffed = false
 
 -- Functions
 exports('IsHandcuffed', function()
@@ -263,7 +264,6 @@ RegisterNetEvent('police:client:CuffPlayer', function(item)
         local player, distance = QBCore.Functions.GetClosestPlayer()
         if player ~= -1 and distance <= 2.5 then
             QBCore.Functions.TriggerCallback('police:server:getCuffStatus', function(cuffstat)
-                local cuffed = false
                 if cuffstat and (item ~= Config.CuffKeyItem or item ~= Config.CutTieItem) and (cuffstat.cuffed and cuffstat.item == item) then QBCore.Functions.Notify(Lang:t("error.already_cuffed"), "error") return end
                 if cuffstat and cuffstat.cuffed then cuffed = true end
                 if not cuffed and item == Config.CuffKeyItem or item == Config.CutTieItem then return end
@@ -272,19 +272,11 @@ RegisterNetEvent('police:client:CuffPlayer', function(item)
                 if facing then
                     if cuffed and cuffstat.pos ~= "front" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
                     TriggerServerEvent('police:server:CuffPlayer', "front", GetPlayerServerId(player), item)
-                    if not cuffed and Config.CuffItems[item] then
-                        TriggerServerEvent('police:server:AddRemove', Config.CuffItems[item].itemname, 1, "remove", SecKey)
-                        if Config.CuffItems[item].needkey then TriggerServerEvent('police:server:AddRemove', Config.CuffKeyItem, 1, "add", SecKey) end
-                    end
                     loadAnimDict("mp_arresting")
                     CuffAnim("mp_arresting", "a_uncuff")
                 else
                     if cuffed and cuffstat.pos ~= "back" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
                     TriggerServerEvent('police:server:CuffPlayer', "back", GetPlayerServerId(player), item)
-                    if not cuffed and Config.CuffItems[item] then
-                        TriggerServerEvent('police:server:AddRemove', Config.CuffItems[item].itemname, 1, "remove", SecKey)
-                        if Config.CuffItems[item].needkey then TriggerServerEvent('police:server:AddRemove', Config.CuffKeyItem, 1, "add", SecKey) end
-                    end
                     loadAnimDict("mp_arresting")
                     CuffAnim("mp_arresting", "a_uncuff")
                 end
@@ -297,7 +289,7 @@ RegisterNetEvent('police:client:CuffPlayer', function(item)
     end
 end)
 
-RegisterNetEvent('police:client:UnCuffPlayer', function(item)
+RegisterNetEvent('police:client:UnCuffPlayer', function(item, source)
     if not IsPedRagdoll(PlayerPedId()) then
         local player, distance = QBCore.Functions.GetClosestPlayer()
         if player ~= -1 and distance <= 2.5 then
@@ -310,8 +302,8 @@ RegisterNetEvent('police:client:UnCuffPlayer', function(item)
                         if cuffstat.cuffed and cuffstat.pos ~= "front" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
                         TriggerServerEvent('police:server:CuffPlayer', "front", GetPlayerServerId(player), item)
                         if cuffstat.cuffed and item == Config.CuffKeyItem then
-                            TriggerServerEvent('police:server:AddRemove', Config.CuffKeyItem, 1, "remove", SecKey)
-                            TriggerServerEvent('police:server:AddRemove', Config.CuffItems[cuffstat.item].itemname, 1, "add", SecKey)
+                            TriggerServerEvent('police:server:AddRemove', Config.CuffKeyItem, 1, "remove", source, SecKey)
+                            TriggerServerEvent('police:server:AddRemove', Config.CuffItems[cuffstat.item].itemname, 1, "add", source, SecKey)
                         end
                         loadAnimDict("mp_arresting")
                         CuffAnim("mp_arresting", "a_uncuff")
@@ -319,8 +311,8 @@ RegisterNetEvent('police:client:UnCuffPlayer', function(item)
                         if cuffstat.cuffed and cuffstat.pos ~= "back" then QBCore.Functions.Notify(Lang:t("error.where_looking"), "error") return end
                         TriggerServerEvent('police:server:CuffPlayer', "back", GetPlayerServerId(player), item)
                         if cuffstat.cuffed and item == Config.CuffKeyItem then
-                            TriggerServerEvent('police:server:AddRemove', Config.CuffKeyItem, 1, "remove", SecKey)
-                            TriggerServerEvent('police:server:AddRemove', Config.CuffItems[cuffstat.item].itemname, 1, "add", SecKey)
+                            TriggerServerEvent('police:server:AddRemove', Config.CuffKeyItem, 1, "remove", source, SecKey)
+                            TriggerServerEvent('police:server:AddRemove', Config.CuffItems[cuffstat.item].itemname, 1, "add", source,SecKey)
                         end
                         loadAnimDict("mp_arresting")
                         CuffAnim("mp_arresting", "a_uncuff")
@@ -478,6 +470,25 @@ end)
 RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
     local ped = PlayerPedId()
     if not isHandcuffed then
+        local success = nil
+        if Config.BreakOutCuffing.active then
+            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
+            Skillbar.Start({
+                duration = Config.BreakOutCuffing.duration, -- how long the skillbar runs for
+                pos = Config.BreakOutCuffing.pos, -- how far to the right the static box is
+                width = Config.BreakOutCuffing.width, -- how wide the static box is
+            }, function()
+                success = true
+            end, function()
+                success = false
+            end)
+            while success == nil do Wait(10) end
+        end
+        if Config.BreakOutCuffing.active and success then return end
+        if not cuffed and Config.CuffItems[item] then
+            TriggerServerEvent('police:server:AddRemove', Config.CuffItems[item].itemname, 1, "remove", source,  SecKey)
+            if Config.CuffItems[item].needkey then TriggerServerEvent('police:server:AddRemove', Config.CuffKeyItem, 1, "add", source, SecKey) end
+        end
         isHandcuffed = true
         TriggerServerEvent("police:server:SetHandcuffStatus", true, item, position)
         ClearPedTasksImmediately(ped)
