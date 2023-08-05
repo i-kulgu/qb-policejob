@@ -231,7 +231,7 @@ local function MenuGarage(currentSelection)
                                     event = "police:client:VehicleSubMenu",
                                     args = {
                                         vehicle = veh,
-                                        vehlabel = veh,
+                                        vehlabel = data.label,
                                         currentSelection = currentSelection,
                                         livery = data.livery,
                                         car = b.veh,
@@ -262,7 +262,7 @@ local function MenuGarage(currentSelection)
                             event = "police:client:VehicleSubMenu",
                             args = {
                                 vehicle = veh,
-                                vehlabel = veh,
+                                vehlabel = data.label,
                                 currentSelection = currentSelection,
                                 livery = data.livery,
                                 out = false,
@@ -576,7 +576,7 @@ RegisterNetEvent('police:client:TakeOutImpound', function(data)
 end)
 
 RegisterNetEvent('police:client:VehicleSubMenu', function(data)
-    local vehLabel = QBCore.Shared.Vehicles[data.vehicle].label
+    local vehLabel = data.vehlabel
     local SubMenu = {}
     SubMenu[#SubMenu+1] = {header = vehLabel.." Menu", txt = "Take out or return your vehicle", isMenuHeader = true}
     if data.out then
