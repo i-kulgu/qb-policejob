@@ -52,6 +52,7 @@ v1.3.3
 - Added breakout option. When you enable this in config, the cuffed player will see a minigame and when they success they can escape.
 - Fixed the problem with negative amounts for depot / impound
 - Fixed warning with missing phrases
+- Animation fix for dead or in last stand players
 
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
