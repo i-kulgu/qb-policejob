@@ -330,7 +330,7 @@ QBCore.Commands.Add("depot", Lang:t("commands.depot"), {}, false, function(sourc
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
-        TriggerClientEvent("police:client:ImpoundVehicle", src, false, tonumber(args[1]))
+        TriggerClientEvent("police:client:ImpoundVehicle", src, false)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.on_duty_police_only"), 'error')
     end
