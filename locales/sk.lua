@@ -86,6 +86,7 @@ local Translations = {
         evidence_stash = 'Úložisko pre Dôkazy | %{value}',
         slot = 'Priestor č. (1,2,3)',
         current_evidence = '%{value} | Zásuvka %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[~g~E~s~] - Ísť do služby',
         off_duty = '[~r~E~s~] - Ísť mimo službu',
         onoff_duty = '~g~On~s~/~r~Off~s~ Duty',

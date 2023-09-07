@@ -29,9 +29,9 @@ local function UpdateBlips()
                     w = heading
                 }
             }
+            TriggerClientEvent("police:client:UpdateBlips", v.PlayerData.source, dutyPlayers)
         end
     end
-    TriggerClientEvent("police:client:UpdateBlips", -1, dutyPlayers)
 end
 
 local function CreateBloodId()
@@ -330,7 +330,7 @@ QBCore.Commands.Add("depot", Lang:t("commands.depot"), {}, false, function(sourc
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
-        TriggerClientEvent("police:client:ImpoundVehicle", src, false)
+        TriggerClientEvent("police:client:ImpoundVehicle", src, false, tonumber(args[1]))
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.on_duty_police_only"), 'error')
     end
@@ -759,6 +759,10 @@ RegisterNetEvent('police:server:CuffPlayer', function(position, id, item)
     TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, position, item)
 end)
 
+RegisterNetEvent('qb-policejob:server:NotifyOtherPlayer', function(source, message, type, time)
+    TriggerClientEvent('QBCore:Notify', source, message, type, time)
+end)
+
 RegisterNetEvent('police:server:CutCuffs', function(id, item)
     local src = source
     local playerPed = GetPlayerPed(src)
@@ -1184,8 +1188,8 @@ end)
 
 RegisterNetEvent('police:server:showFingerprint', function(playerId)
     local src = source
-    TriggerClientEvent('police:client:showFingerprint', playerId, src)
-    TriggerClientEvent('police:client:showFingerprint', src, playerId)
+    TriggerClientEvent('police:client:showFingerprint', playerId, src, playerId)
+    TriggerClientEvent('police:client:showFingerprint', src, playerId, playerId)
 end)
 
 RegisterNetEvent('police:server:showFingerprintId', function(sessionId)
@@ -1194,8 +1198,8 @@ RegisterNetEvent('police:server:showFingerprintId', function(sessionId)
     local fid = Player.PlayerData.metadata["fingerprint"]
     local cid = Player.PlayerData.citizenid
     local name = Player.PlayerData.charinfo.firstname..' '..Player.PlayerData.charinfo.lastname
-    TriggerClientEvent('police:client:showFingerprintId', sessionId, fid, name, cid)
-    TriggerClientEvent('police:client:showFingerprintId', src, fid, name, cid)
+    TriggerClientEvent('police:client:showFingerprintId', sessionId, fid, name, cid, src)
+    TriggerClientEvent('police:client:showFingerprintId', src, fid, name, cid, src)
 end)
 
 RegisterNetEvent('police:server:SetTracker', function(targetId)

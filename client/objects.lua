@@ -288,12 +288,14 @@ RegisterNetEvent('police:client:removeSpike', function(name)
     end
 end)
 
-exports['qb-target']:AddTargetModel(spikemodel, {
-    options = {
+AddTargetModel(spikemodel, {
+    Options  = {
         {
-            icon = "fas fa-hand-holding",
-            label = "Pick Up",
-            jobType = 'leo',
+            icon  = 'fas fa-hand-holding',
+            label = 'Pick Up',
+            canInteract = function()
+                if PlayerJob.type == "leo" then return true end
+            end,
             action = function(entity)
                 GetClosestSpike()
                 local spike = NetToEnt(SpawnedSpikes[ClosestSpike].netid)
@@ -312,8 +314,7 @@ exports['qb-target']:AddTargetModel(spikemodel, {
                     ClosestSpike = nil
                     TriggerServerEvent('police:server:SyncSpikes', SpawnedSpikes)
                 end
-            end
-        },
-    },
-    distance = 2.0
-})
+            end,
+        }
+    }}
+)

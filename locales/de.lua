@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'BeweisStash | %{value}',
         slot = 'Lade-Nr. (1,2,3)',
         current_evidence = '%{value} | Lade %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '~b~[~g~E~b~]~w~ Einstempeln',
         off_duty = '~b~[~r~E~b~]~w~ Ausstempeln',
         onoff_duty = '~g~EIN~s~/~r~AUS~s~ Dienst',

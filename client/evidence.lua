@@ -205,7 +205,7 @@ end)
 
 AddEventHandler("CEventGunShot", function(witnesses, ped)
     if PlayerPedId() ~= ped then return end
-    if witnesses[1] ~= ped then return end
+    -- if witnesses[1] ~= ped then return end
     local weapon = GetSelectedPedWeapon(ped)
     if not WhitelistedWeapon(weapon) then
         shotAmount = shotAmount + 1
@@ -214,7 +214,7 @@ AddEventHandler("CEventGunShot", function(witnesses, ped)
                 TriggerEvent('evidence:client:SetStatus', 'gunpowder', 200)
             end
         end
-        DropBulletCasing(weapon, ped)
+        if PlayerJob.type ~= 'leo' then DropBulletCasing(weapon, ped) end
     end
 end)
 

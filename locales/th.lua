@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'หลักฐานที่รวบรวมไว้ | %{value}',
         slot = 'เลขที่ช่อง. (1,2,3)',
         current_evidence = '%{value} | ลิ้นชัก %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[E] - เข้าเวร',
         off_duty = '[E] - ออกเวร',
         onoff_duty = '~g~เข้า~s~/~r~ออก~s~ เวร',

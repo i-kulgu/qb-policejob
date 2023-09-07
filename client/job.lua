@@ -12,6 +12,7 @@ local GaragePed = {}
 local HeliPed = {}
 local Heli = nil
 local PDCar = {}
+local garageSelection = nil
 
 
 local function loadAnimDict(dict) -- interactions, job,
@@ -390,9 +391,9 @@ local function ClearHeadshots()
     end
 end
 
-local function GetHeadshot()
+local function GetHeadshot(pid)
     ClearHeadshots()
-    local ped = PlayerPedId()
+    local ped = GetPlayerPed(GetPlayerFromServerId( pid ))
 
     if not DoesEntityExist(ped) then
         return false
@@ -424,13 +425,13 @@ RegisterNetEvent('police:client:showFingerprint', function(playerId)
     FingerPrintSessionId = playerId
 end)
 
-RegisterNetEvent('police:client:showFingerprintId', function(fid, name, cid)
+RegisterNetEvent('police:client:showFingerprintId', function(fid, name, cid, pid)
     SendNUIMessage({
         type = "updateFingerprintId",
         Fingerprint = fid,
         Name = name,
         Citizenid = cid,
-        Headshot = GetHeadshot()
+        Headshot = GetHeadshot(pid)
     })
     PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0, 0, 1)
 end)
@@ -551,9 +552,9 @@ RegisterNetEvent('police:client:CheckStatus', function()
     end)
 end)
 
-RegisterNetEvent("police:client:VehicleMenuHeader", function (data)
-    MenuGarage(data.currentSelection)
-    currentGarage = data.currentSelection
+RegisterNetEvent("police:client:VehicleMenuHeader", function ()
+    MenuGarage(garageSelection)
+    currentGarage = garageSelection
 end)
 
 
@@ -1132,127 +1133,125 @@ if Config.UseTarget then
     CreateThread(function()
         -- Toggle Duty
         for k, v in pairs(Config.Locations["duty"]) do
-            exports['qb-target']:AddBoxZone("PoliceDuty_"..k, vector3(v.x, v.y, v.z), 1, 1, {
-                name = "PoliceDuty_"..k,
-                heading = 11,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
-                options = {
+            AddBoxZone("PoliceDuty_"..k, {
+                Position = vector3(v.x, v.y, v.z),
+                Distance = 1.5,
+                Height   = 1.0,
+                Options  = {
                     {
-                        type = "client",
-                        event = "qb-policejob:ToggleDuty",
-                        icon = "fas fa-sign-in-alt",
+                        icon  = 'fas fa-sign-in-alt',
                         label = "Sign In",
-                        jobType = 'leo',
+                        canInteract = function(entity,distance,data)
+                          if PlayerJob.type == "leo" then return true end
+                        end,
+                        action = function(entity)
+                          TriggerEvent("qb-policejob:ToggleDuty")
+                        end,
                     },
                 },
-                distance = 1.5
             })
         end
 
         -- Personal Stash
         for k, v in pairs(Config.Locations["stash"]) do
-            exports['qb-target']:AddBoxZone("PoliceStash_"..k, vector3(v.x, v.y, v.z), 1.5, 1.5, {
-                name = "PoliceStash_"..k,
-                heading = 11,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
-                options = {
+            AddBoxZone("PoliceStash_"..k, {
+                Position = vector3(v.x, v.y, v.z),
+                Distance = 1.5,
+                Height   = 1.0,
+                Options  = {
                     {
-                        type = "client",
-                        event = "qb-police:client:openStash",
-                        icon = "fas fa-dungeon",
+                        icon  = 'fas fa-dungeon',
                         label = "Open Personal Stash",
-                        jobType = "leo"
+                        canInteract = function()
+                          if PlayerJob.type == "leo" then return true end
+                        end,
+                        action = function()
+                          TriggerEvent("qb-police:client:openStash")
+                        end,
                     },
                 },
-                distance = 1.5
             })
         end
 
         -- Police Trash
         for k, v in pairs(Config.Locations["trash"]) do
-            exports['qb-target']:AddBoxZone("PoliceTrash_"..k, vector3(v.x, v.y, v.z), 1, 1.75, {
-                name = "PoliceTrash_"..k,
-                heading = 11,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
-                options = {
+            AddBoxZone("PoliceTrash_"..k, {
+                Position = vector3(v.x, v.y, v.z),
+                Distance = 1.5,
+                Height   = 1.0,
+                Options  = {
                     {
-                        type = "client",
-                        event = "qb-police:client:openTrash",
-                        icon = "fas fa-trash",
+                        icon  = 'fas fa-trash',
                         label = "Open Trash",
-                        jobType = "leo"
+                        canInteract = function()
+                          if PlayerJob.type == "leo" then return true end
+                        end,
+                        action = function()
+                          TriggerEvent("qb-police:client:openTrash")
+                        end,
                     },
                 },
-                distance = 1.5
             })
         end
 
         -- Fingerprint
         for k, v in pairs(Config.Locations["fingerprint"]) do
-            exports['qb-target']:AddBoxZone("PoliceFingerprint_"..k, vector3(v.x, v.y, v.z), 2, 1, {
-                name = "PoliceFingerprint_"..k,
-                heading = 11,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
-                options = {
+            AddBoxZone("PoliceFingerprint_"..k, {
+                Position = vector3(v.x, v.y, v.z),
+                Distance = 1.5,
+                Height   = 1.0,
+                Options  = {
                     {
-                        type = "client",
-                        event = "qb-police:client:scanFingerPrint",
-                        icon = "fas fa-fingerprint",
+                        icon  = 'fas fa-fingerprint',
                         label = "Open Fingerprint",
-                        jobType = "leo"
+                        canInteract = function()
+                          if PlayerJob.type == "leo" then return true end
+                        end,
+                        action = function()
+                          TriggerEvent("qb-police:client:scanFingerPrint")
+                        end,
                     },
                 },
-                distance = 1.5
             })
         end
 
         -- Armoury
         for k, v in pairs(Config.Locations["armory"]) do
-            exports['qb-target']:AddBoxZone("PoliceArmory_"..k, vector3(v.x, v.y, v.z), 5, 1, {
-                name = "PoliceArmory_"..k,
-                heading = 11,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
-                options = {
+            AddBoxZone("PoliceArmory_"..k, {
+                Position = vector3(v.x, v.y, v.z),
+                Length = 5,
+                Width = 2,
+                Distance = 1.5,
+                Height   = 1.0,
+                Options  = {
                     {
-                        type = "client",
-                        event = "qb-police:client:openArmoury",
-                        icon = "fas fa-swords",
+                        icon  = 'fas fa-swords',
                         label = "Open Armory",
-                        jobType = "leo"
+                        canInteract = function()
+                          if PlayerJob.type == "leo" then return true end
+                        end,
+                        action = function()
+                          TriggerEvent("qb-police:client:openArmoury")
+                        end,
                     },
                 },
-                distance = 1.5
             })
         end
 
         for k, v in pairs(Config.Locations["evidence"]) do
-            exports['qb-target']:AddBoxZone("PoliceEvidenceStash_"..k, vector3(v.x, v.y, v.z), 2, 2, {
-                name = "PoliceEvidenceStash_"..k,
-                heading = 11,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
-                options = {
+            AddBoxZone("PoliceEvidenceStash_"..k, {
+                Position = vector3(v.x, v.y, v.z),
+                Length = 2,
+                Width = 2,
+                Distance = 1.5,
+                Height   = 1.0,
+                Options  = {
                     {
-                        icon = 'fa-solid fa-folder-open',
+                        icon  = 'fa-solid fa-folder-open',
                         label = "Open Evidence",
-                        jobType = "leo",
+                        canInteract = function()
+                          if PlayerJob.type == "leo" then return true end
+                        end,
                         action = function()
                             local currentEvidence = 0
                             local pos = GetEntityCoords(PlayerPedId())
@@ -1297,7 +1296,6 @@ if Config.UseTarget then
                         end,
                     },
                 },
-                distance = 1.5
             })
         end
 
@@ -1310,33 +1308,29 @@ if Config.UseTarget then
             SetBlockingOfNonTemporaryEvents(GaragePed[k], true)
             SetEntityInvincible(GaragePed[k], true) --Don't let the ped die.
             TaskStartScenarioInPlace(GaragePed[k], "WORLD_HUMAN_CLIPBOARD", 0, true)
-            exports['qb-target']:AddBoxZone("GaragePed"..k, vector3(v.x,v.y,v.z), 0.8, 0.6, {
-                name = "GaragePed"..k, heading=v.w, debugPoly=false, minZ=v.z - 2, maxZ=v.z + 2,}, {
-                options = {{
-                    type = "client",
-                    event = "police:client:VehicleMenuHeader",
-                    label = Lang:t("menu.pol_garage"),
-                    currentSelection = k,
-                    icon = 'fas fa-car-on',
-                    jobType = "leo"}},
-                distance = 1.5,})
+            AddBoxZone("GaragePed_"..k, {
+                Position = vector4(v.x, v.y, v.z, v.w),
+                Length = 0.8,
+                Width = 0.6,
+                Distance = 1.5,
+                Height   = 2.0,
+                Options  = {
+                    {
+                        icon  = 'fas fa-car-on',
+                        label = Lang:t("menu.pol_garage"),
+                        canInteract = function()
+                            if PlayerJob.type == "leo" then return true end
+                        end,
+                        action = function()
+                            garageSelection = k
+                            TriggerEvent("police:client:VehicleMenuHeader")
+                        end,
+                    },
+                },
+            })
         end
 
         for k, v in pairs(Config.Locations["helicopter"]) do
-            local helioptions = {}
-            if Heli then
-                helioptions = { label = Lang:t("menu.remove_heli"), icon = 'fas fa-helicopter', jobType = "leo",
-                action = function()
-                    TriggerEvent('qb-police:client:removeHelicopter')
-                end,
-            }
-            else
-                helioptions = { label = Lang:t("menu.spawn_heli"), icon = 'fas fa-helicopter', jobType = "leo",
-                    action = function()
-                        TriggerEvent('qb-police:client:spawnHelicopter', k)
-                    end,
-                }
-            end
             local hash = GetHashKey(Config.GaragePedModel)
             RequestModel(hash)
             while not HasModelLoaded(hash) do Wait(10) end
@@ -1345,62 +1339,73 @@ if Config.UseTarget then
             SetBlockingOfNonTemporaryEvents(HeliPed[k], true)
             SetEntityInvincible(HeliPed[k], true) --Don't let the ped die.
             TaskStartScenarioInPlace(HeliPed[k], "WORLD_HUMAN_CLIPBOARD", 0, true)
-            exports['qb-target']:AddBoxZone("HeliPed"..k, vector3(v.x,v.y,v.z), 0.8, 0.6, {
-                name = "HeliPed"..k, heading=v.w, debugPoly=false, minZ=v.z - 2, maxZ=v.z + 2,}, {
-                options = {
+            AddBoxZone("HeliPed_"..k, {
+                Position = vector4(v.x, v.y, v.z, v.w),
+                Length = 0.8,
+                Width = 0.6,
+                Distance = 1.5,
+                Height   = 2.0,
+                Options  = {
                     {
+                        icon  = 'fas fa-helicopter',
                         label = Lang:t("menu.spawn_heli"),
-                        icon = 'fas fa-helicopter',
-                        jobType = "leo",
                         canInteract = function()
-                            if not Heli then return true end
+                            if PlayerJob.type == "leo" and not Heli then return true end
                         end,
                         action = function()
-                            TriggerEvent('qb-police:client:spawnHelicopter', k)
+                            TriggerEvent("qb-police:client:spawnHelicopter", k)
                         end,
                     },
                     {
+                        icon  = 'fas fa-helicopter',
                         label = Lang:t("menu.remove_heli"),
-                        icon = 'fas fa-helicopter',
-                        jobType = "leo",
                         canInteract = function()
-                            if Heli then return true end
+                            if PlayerJob.type == "leo" and Heli then return true end
                         end,
                         action = function()
-                            TriggerEvent('qb-police:client:removeHelicopter')
+                            return TriggerEvent("qb-police:client:removeHelicopter")
                         end,
                     }
                 },
-                distance = 1.5,
             })
         end
 
         for k, v in pairs(Config.Locations["labs"]) do
-            exports['qb-target']:AddBoxZone("PoliceLabs"..k, vector3(v.x,v.y,v.z), 0.8, 0.6, {
-                name = "PoliceLabs"..k, heading=v.w, debugPoly=false, minZ=v.z - 2, maxZ=v.z + 2,}, {
-                options = {{
-                    type = "client",
-                    event = "police:client:FindEvidenceBag",
-                    label = Lang:t("menu.evd_research"),
-                    icon = 'fa-solid fa-flask-vial',
-                    jobType = "leo"}},
-                distance = 1.5,
+            AddBoxZone("PoliceLabs_"..k, {
+                Position = vector4(v.x, v.y, v.z, 0.0),
+                Length = 0.8,
+                Width = 0.6,
+                Distance = 1.5,
+                Height   = 2.0,
+                Options  = {
+                    {
+                        icon  = 'fa-solid fa-flask-vial',
+                        label = Lang:t("menu.evd_research"),
+                        canInteract = function()
+                            if PlayerJob.type == "leo" then return true end
+                        end,
+                        action = function()
+                            TriggerEvent("police:client:FindEvidenceBag")
+                        end,
+                    },
+                },
             })
         end
 
-        exports['qb-target']:AddTargetBone('seat_dside_f', {
-        options = {{
-            icon = 'fa-solid fa-car-burst',
-            label = Lang:t("info.tow_vehicle"),
-            action = function() 
-                local Vehicle = QBCore.Functions.GetClosestVehicle()
-                local Plate = QBCore.Functions.GetPlate(Vehicle)
-                TriggerEvent('police:client:TowMenu', Vehicle, Plate)
-            end,
-            jobType = 'leo',
-            }},
-            distance = 2.5
-        })
+        AddTargetBone('seat_dside_f', {
+            Options  = {
+                icon  = 'fa-solid fa-car-burst',
+                label = Lang:t("info.tow_vehicle"),
+                canInteract = function()
+                    if PlayerJob.type == "leo" then return true end
+                end,
+                action = function()
+                    local Vehicle = QBCore.Functions.GetClosestVehicle()
+                    local Plate = QBCore.Functions.GetPlate(Vehicle)
+                    TriggerEvent('police:client:TowMenu', Vehicle, Plate)
+                end,
+            }}
+        )
 
     end)
 

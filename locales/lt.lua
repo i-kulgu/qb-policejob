@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'Įkalčių saugykla | %{value}',
         slot = 'Lentynos nr. (1,2,3)',
         current_evidence = '%{value} | Lentyna %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[E] - Ateiti į tarnybą',
         off_duty = '[E] - Išeiti iš tarnybos',
         onoff_duty = 'Tarnyboje - ~g~TAIP~s~/~r~NE',

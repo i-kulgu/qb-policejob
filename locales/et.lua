@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'Asitõendid | %{value}',
         slot = 'Riiul no. (1,2,3)',
         current_evidence = '%{value} | Sahtel %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[E] - Alusta tööpäeva',
         off_duty = '[E] - Lõpeta tööpäev',
         onoff_duty = '~g~On~s~/~r~Off~s~ Töö',

@@ -58,6 +58,7 @@ local Translations = {
         impounded = 'Vehicle impounded',
         beingonduty = 'You\'re on duty',
         beingoffduty = 'You\'re off duty',
+        cuffed_player = 'You have succesfully cuffed the citizen'
     },
     info = {
         mr = 'Mr.',
@@ -103,7 +104,7 @@ local Translations = {
         evidence_stash = 'Evidence Stash | %{value}',
         slot = 'Slot no (1,2,3)',
         current_evidence = 'Stash #%{value} | Drawer #%{value2}',
-        general_current_evidence = 'General Evidence Stash - #%{value}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[E] - Go on duty',
         off_duty = '[E] - Go off duty',
         onoff_duty = '~g~On~s~/~r~Off~s~ Duty',

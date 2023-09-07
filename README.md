@@ -7,23 +7,7 @@ For help, questions and other resources you can join my discord : [Hi-Dev](https
 
 If you like my work and want to support me : [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F2F3EU9ME)
 
-## Features
-### New
-- Multiple locations
-- Tie players with a rope item and untie them with knife
-- Target ped interactions (Robplayer, Tie / Untie, Kidnap - Escort and Cuff for policejob only)
-- Updated the evidence stash
-- Change the duty with the menu
-- You can write comment on evidence bags
-- Added config option for block to see trough walls with thermal in heli
-- Added target and ped for police garage
-- Every garage has his own vehicle list
-- Changed the garage logic where you can choose the job level for a specific car
-- Moved the livery option into the car options
-- Added option for max mods for engine, brake, transmission, armour, turbo
-- Added target and ped for spawning and returning helicopter
-- Only 1 heli can be spawned by 1 player
-- Each officier can get 1 vehicle and return it from ped menu
+## Updates
 
 v1.3.0
 - Added cuff, ziptie, broken handcuffs, cuffkeys, bolt cutter and flush cutter
@@ -53,6 +37,16 @@ v1.3.3
 - Fixed the problem with negative amounts for depot / impound
 - Fixed warning with missing phrases
 - Animation fix for dead or in last stand players
+
+v1.3.4
+- Fixed general evidence stash not opening problem
+- Added ps-ui option for breakout system
+- Officier will get notification when successfully cuffed or citizen broke out
+- Added support for qb-target / qtarget / ox_target
+- Fixed fingerprint image showing wrong person
+- Added more possibility to drop bullet when shooting
+- If you are LEO then you can't drop bullets when shooting
+- Optimize blips network event
 
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
@@ -93,7 +87,7 @@ v1.3.3
 ````
 
 
-- Update the filled evidence bag in your qb-inventory
+- Update the filled evidence bag in your qb-inventory/html/js/app.js
 ```
 else if (itemData.name == "filled_evidence_bag") {
     $(".item-info-title").html("<p>" + itemData.label + "</p>");
@@ -185,39 +179,4 @@ else if (itemData.name == "filled_evidence_bag") {
 - [qb-input](https://github.com/qbcore-framework/qb-input) - For accessing evidence stashes
 
 ### Commands
-- /spikestrip - Places spike strip on ground.
-- /pobject [pion/barier/schotten/tent/light/delete] - Places or deletes an object on/from ground.
-- /cuff - Cuffs/Uncuffs nearby player
-- /escort - Escorts nearby plyer.
-- /callsign [text] - Sets the player a callsign on database.
-- /clearcasings - Clears nearby bullet casings.
-- /jail [id] [time] - Sends a player to the jail.
-- /unjail [id] - Takes the player out of jail.
-- /clearblood - Clears nearby blood drops.
-- /seizecash - Seizes nearby player's cash. (Puts in money bag)
-- /sc - Puts soft cuff on nearby player.
-- /cam [cam] - Shows the selected security cam display.
-- /flagplate [plate] [reason] - Flags the vehicle.
-- /unflagplate [plate] - Removes the flag of a vehicle.
-- /plateinfo [plate] - Displays if a vehicle is marked or not.
-- /depot [price] - Depots nearby vehicle. Player can take it after paying the cost.
-- /impound - Impounds nearby vehicle permanently.
-- /paytow [id] - Makes payment to the tow driver.
-- /paylawyer [id] - Makes payment to the lawyer.
-- /radar - Toggles the police radar.
-- /911 [message] - Sends a report to emergency services.
-- /911r [id] - Used to respond the emergency alerts.
-- /911a [message] - Sends an anonymous report to emergency services (gives no location).
-- /anklet - Places anklet (tracking device) on nearby player.
-- /removeanklet [citizenid] - Removes the anklet from player.
-- /ebutton - Used to respond an emergency alert.
-- /takedrivinglicense - Takes the driving license from nearby player.
-- /takedna [id] - Takes a DNA sample from the player.
-
-### Manual
-- Download the script and put it in the `[qb]` directory.
-- Add the following code to your server.cfg/resouces.cfg
-```
-ensure qb-core
-ensure qb-policejob
-```
+https://docs.qbcore.org/qbcore-documentation/qbcore-resources/qb-policejob#commands

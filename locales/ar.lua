@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'خزنة الأدلة | %{value}',
         slot = '(1,2,3)',
         current_evidence = '%{value} | الدرج %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[~g~E~s~] - ﺔﻣﺪﺨﻟﺍ ﻝﻮﺧﺩ',
         off_duty = '[~r~E~s~] - ﺔﻣﺪﺨﻟﺍ ﻦﻣ ﺝﻭﺮﺨﻟﺍ',
         onoff_duty = 'ﺔﻣﺪﺨﻟﺍ ﺔﻟﺎﺣ',

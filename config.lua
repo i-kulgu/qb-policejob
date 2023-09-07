@@ -16,7 +16,10 @@ Config.TieItem = 'ziptie'
 Config.CutTieItem = 'flush_cutter'
 Config.CutCuffItem = 'bolt_cutter'
 Config.BrokenCuffItem = 'broken_handcuffs'
-Config.BreakOutCuffing = {active = false, duration = math.random(2500,5000), pos = math.random(10, 30), width = math.random(10, 20)}
+Config.BreakOutCuffing = {active = true, duration = math.random(2500,5000), pos = math.random(10, 30), width = math.random(10, 20)}
+Config.BreakoutMinigame = 'qb-skillbar' -- Choose the cuff breakout minigame : qb-skillbar / ps-ui (circle)
+Config.TargetSystem = 'qb-target' -- Target system you want to use : qb-target / qtarget / ox_target
+Config.Debug = false -- Enable / Disable debugpoly 
 
 -- itemname = name of the item
 -- propname = the prop used for cuffing

@@ -472,16 +472,30 @@ RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
     if not isHandcuffed then
         local success = nil
         if Config.BreakOutCuffing.active then
-            local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
-            Skillbar.Start({
-                duration = Config.BreakOutCuffing.duration, -- how long the skillbar runs for
-                pos = Config.BreakOutCuffing.pos, -- how far to the right the static box is
-                width = Config.BreakOutCuffing.width, -- how wide the static box is
-            }, function()
-                success = true
-            end, function()
-                success = false
-            end)
+            if Config.BreakoutMinigame == 'qb-skillbar' then
+                local Skillbar = exports['qb-skillbar']:GetSkillbarObject()
+                Skillbar.Start({
+                    duration = Config.BreakOutCuffing.duration, -- how long the skillbar runs for
+                    pos = Config.BreakOutCuffing.pos, -- how far to the right the static box is
+                    width = Config.BreakOutCuffing.width, -- how wide the static box is
+                }, function()
+                    success = true
+                    TriggerServerEvent('qb-policejob:server:NotifyOtherPlayer', source, Lang:t('error.break_out'), 'error', 3500)
+                end, function()
+                    success = false
+                    TriggerServerEvent('qb-policejob:server:NotifyOtherPlayer', source, Lang:t('success.cuffed_player'), 'success', 3500)
+                end)
+            elseif Config.BreakoutMinigame == 'ps-ui' then
+                exports['ps-ui']:Circle(function(done)
+                    if done then
+                        success = true
+                        TriggerServerEvent('qb-policejob:server:NotifyOtherPlayer', source, Lang:t('error.break_out'), 'error', 3500)
+                    else
+                        success = false
+                        TriggerServerEvent('qb-policejob:server:NotifyOtherPlayer', source, Lang:t('success.cuffed_player'), 'success', 3500)
+                    end
+                end, 2, 20) -- NumberOfCircles, MS
+            end
             while success == nil do Wait(10) end
         end
         if Config.BreakOutCuffing.active and success then return end
@@ -616,27 +630,37 @@ CreateThread(function()
     end
 end)
 
-exports['qb-target']:AddGlobalPlayer({
-    options = {
+AddGlobalPlayer({
+    Options  = {
         {
-          type = "client",
-          event = "police:client:RobPlayer",
-          icon = 'fas fa-mask',
-          label = 'Rob Player',
+            icon  = 'fas fa-mask',
+            label = 'Rob Player',
+            canInteract = function()
+                return true
+            end,
+            action = function()
+                TriggerEvent('police:client:RobPlayer')
+            end,
         },
         {
-            type = "client",
-            event = "police:client:KidnapPlayer",
-            icon = 'fas fa-user-group',
+            icon  = 'fas fa-user-group',
             label = 'Kidnap Player',
+            canInteract = function()
+                return true
+            end,
+            action = function()
+                TriggerEvent('police:client:KidnapPlayer')
+            end,
         },
         {
-            type = "client",
-            event = 'police:client:EscortPlayer',
-            icon = 'fas fa-user-group',
+            icon  = 'fas fa-user-group',
             label = 'Escort',
-            jobType = 'leo'
+            canInteract = function()
+                return true
+            end,
+            action = function()
+                TriggerEvent('police:client:EscortPlayer')
+            end,
         },
-    },
-    distance = 2.5,
-})
+    }}
+)

@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'Kanıt Zulası | %{value}',
         slot = 'Yuva numarası (1,2,3)',
         current_evidence = '%{value} | Çekmece %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[E] - Göreve başla',
         off_duty = '[E] - Görevi bırak',
         onoff_duty = 'Göreve ~g~Başla~s~/~r~Bırak~s~',

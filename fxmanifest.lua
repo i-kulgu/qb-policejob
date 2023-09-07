@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 description 'QB-PoliceJob'
-version '1.3.3'
+version '1.3.4'
 
 shared_scripts {
     'config.lua',
@@ -15,6 +15,7 @@ client_scripts {
     '@PolyZone/client.lua',
     '@PolyZone/BoxZone.lua',
     '@PolyZone/ComboZone.lua',
+    'bridge/*.lua',
     'client/main.lua',
     'client/camera.lua',
     'client/interactions.lua',

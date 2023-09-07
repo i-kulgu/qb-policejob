@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'Todisteet | %{value}',
         slot = 'Kolikkopelin numero. (1,2,3)',
         current_evidence = '%{value} | Laatikko %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[E] - Mene virkaajalle',
         off_duty = '[E] - Mene virkavapaalle',
         onoff_duty = '~g~Päälle~s~/~r~Pois~s~ Virka',

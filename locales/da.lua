@@ -87,6 +87,7 @@ local Translations = {
         evidence_stash = 'Bevis Stash | %{value}',
         slot = 'Slot nr. (1,2,3)',
         current_evidence = '%{value} | Skuffe %{value2}',
+        general_current_evidence = 'General Evidence Stash | #%{value}',
         on_duty = '[E] - Gå på vagt',
         off_duty = '[E] - Tag fri',
         onoff_duty = '~g~On~s~/~r~Off~s~ Duty',
