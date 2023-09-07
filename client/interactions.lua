@@ -415,6 +415,8 @@ RegisterNetEvent('police:client:GetEscorted', function(playerId)
     end)
 end)
 
+RegisterNetEvent('police:client:setEscortStatus', function(bool) isEscortingPlayer = bool print('Escorting player') end)
+
 RegisterNetEvent('police:client:DeEscort', function()
     isEscorted = false
     TriggerEvent('hospital:client:isEscorted', isEscorted)
@@ -624,7 +626,7 @@ CreateThread(function()
                 TaskPlayAnim(PlayerPedId(), animDict, animName, 8.0, -8, -1, cuffType, 0, 0, 0, 0)
             end
         end
-        if not isHandcuffed and not isEscorted then
+        if not isHandcuffed and not isEscorted and not isEscortingPlayer then
             Wait(2000)
         end
     end
