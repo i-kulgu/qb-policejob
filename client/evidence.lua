@@ -288,20 +288,18 @@ RegisterNetEvent('police:client:SelectEvidence', function(Data)
                 isMenuHeader = true
             }}
 
-            for l, n in pairs(List) do
-                if n.info.serie == 'Unknown' then 
-                    EvidenceBagsMenu[#EvidenceBagsMenu+1] = {
-                        header = n.label,
-                        txt = Lang:t('info.select_for_examine_b', {street = n.info.street, label= n.info.label, slot=n.slot}),
-                        params  = {
-                            event = 'police:client:ExamineEvidenceBag',
-                            args = {
-                                Item = n,
-                                slot = n.slot
-                            }
+            for _, n in pairs(List) do
+                EvidenceBagsMenu[#EvidenceBagsMenu+1] = {
+                    header = n.label,
+                    txt = Lang:t('info.select_for_examine_b', {street = n.info.street, label= n.info.label, slot=n.slot}),
+                    params  = {
+                        event = 'police:client:ExamineEvidenceBag',
+                        args = {
+                            Item = n,
+                            slot = n.slot
                         }
                     }
-                end
+                }
             end
 
             EvidenceBagsMenu[#EvidenceBagsMenu+1] = {
