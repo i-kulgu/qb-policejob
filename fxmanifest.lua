@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 description 'QB-PoliceJob'
-version '1.3.4'
+version '1.3.5'
 
 shared_scripts {
     'config.lua',

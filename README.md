@@ -48,6 +48,9 @@ v1.3.4
 - If you are LEO then you can't drop bullets when shooting
 - Optimize blips network event
 
+v1.3.5
+- Fixed lab evidence menu not showing with blood or fingerprint (thnx @ F7)
+
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
 - Citizen ID based armory (Whitelisted)
