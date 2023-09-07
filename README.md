@@ -50,6 +50,7 @@ v1.3.4
 
 v1.3.5
 - Fixed lab evidence menu not showing with blood or fingerprint (thnx @ F7)
+- Disabled police running / jumping when escorting someone
 
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
