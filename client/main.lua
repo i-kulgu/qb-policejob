@@ -18,11 +18,32 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
         else
             blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
         end
-        if pedinvehicle then
-            SetBlipSprite(blip, 812)
-            ShowHeadingIndicatorOnBlip(blip, false)
+        -- Heli
+        if IsPedInAnyHeli(ped) then
+            SetBlipSprite(blip, 43)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        -- Barcos
+        elseif IsPedInAnyBoat(ped) then
+            SetBlipSprite(blip, 427)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        -- Plane
+        elseif IsPedInAnyPlane(ped) then
+            SetBlipSprite(blip, 16)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        -- MotorBikes
+        elseif IsPedOnAnyBike(ped) then
+            SetBlipSprite(blip, 226)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        -- Police Vehicles
+        elseif IsPedInAnyPoliceVehicle(ped) then
+            SetBlipSprite(blip, 56)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        -- Other Vehicles
+        elseif IsPedInAnyVehicle(ped) then
+            SetBlipSprite(blip, 225)
+            ShowHeadingIndicatorOnBlip(blip, true)
         else
-            SetBlipSprite(blip, 1)
+            SetBlipSprite(blip, 126)
             ShowHeadingIndicatorOnBlip(blip, true)
         end
         ShowHeadingIndicatorOnBlip(blip, true)
