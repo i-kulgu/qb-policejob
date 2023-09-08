@@ -36,6 +36,19 @@ local function IsTargetDead(playerId)
     return retval
 end
 
+local function IsTargetLast(playerId)
+    local retval = false
+    local hasReturned = false
+    QBCore.Functions.TriggerCallback('police:server:isPlayerLast', function(result)
+        retval = result
+        hasReturned = true
+    end, playerId)
+    while not hasReturned do
+      Wait(10)
+    end
+    return retval
+end
+
 local function CuffAnim(dict, anim)
     loadAnimDict(dict)
     TaskPlayAnim(PlayerPedId(), dict, anim, 8.0, -8, -1, 49, 0, false, false, false)
@@ -127,7 +140,7 @@ RegisterNetEvent('police:client:RobPlayer', function()
     if player ~= -1 and distance < 2.5 then
         local playerPed = GetPlayerPed(player)
         local playerId = GetPlayerServerId(player)
-       if IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "anim@move_m@prisoner_cuffed", "idle", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or IsTargetDead(playerId) then
+             if IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "anim@move_m@prisoner_cuffed", "idle", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or IsTargetDead(playerId) or IsTargetLast(playerId) then
             QBCore.Functions.Progressbar("robbing_player", Lang:t("progressbar.robbing"), math.random(5000, 7000), false, true, {
                 disableMovement = true,
                 disableCarMovement = true,
