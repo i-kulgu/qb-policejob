@@ -38,7 +38,7 @@ local Translations = {
         cant_cut = 'No puedes cortar el item con eso!',
         not_enough_money = 'No tienes suficiente dinero',
         break_out = 'Las esposas del sospechoso han sido reventadas!',
-        dont_have_evidence_bag = 'No tienes bolsas de pruebas',
+        dont_have_evidence_bag = 'No tienes bolsas de evidencias',
     },
     success = {
         uncuffed = 'Has sido desesposado',
@@ -58,6 +58,7 @@ local Translations = {
         impounded = 'Vehículo incautado..',
         beingonduty = 'Has entrado de servicio.',
         beingoffduty = 'Has salido de servicio',
+        cuffed_player = 'Has esposado correctamente al civil'
     },
     info = {
         mr = 'Sr.',
@@ -98,7 +99,7 @@ local Translations = {
         time_months = 'Tiempo en meses',
         bill = 'Multa',
         amount = 'Cantidad',
-        police_plate = 'LSPD', --Should only be 4 characters long
+        police_plate = 'LAPD', --Should only be 4 characters long
         vehicle_info = 'Motor: %{value} % | Combustible: %{value2} %',
         evidence_stash = 'Armario de pruebas | %{value}',
         slot = 'Hueco nº (1,2,3)',
@@ -134,9 +135,9 @@ local Translations = {
         fine_issued = 'Se ha enviado una multa al delincuente con éxito',
         received_fine = 'El Crédito del Estado ha recuperado automáticamente las multas adeudadas',
         unknown = 'Desconocido',
-        tow_vehicle = 'Incautar vehículo',
-        select_for_examine_b = 'Calle: %{street}<br>Nombre: %{label}<br>Hueco: %{slot}',
-        input_impound_price = 'Precio de incautación'
+        tow_vehicle = 'Incautar Vehículo',
+        select_for_examine_b = 'Calle: %{street}<br>Nombre: %{label}<br>Slot: %{slot}',
+        input_impound_price = 'Precio de incautado'
     },
     evidence = {
         red_hands = 'Manos rojas',
@@ -158,7 +159,7 @@ local Translations = {
         examine_menu_casing_h = 'Casquillo',
         examine_menu_casing_b = 'Al examinar el casquillo de la bala, puede determinar el modelo y el número de serie del arma.',
         examine_menu_fingerprint_b = 'Huella Dactilar',
-        examine_menu_fingerprint_h = 'Al examinar la evidencia e identificar la ID de la huella dactilar de la persona'
+        examine_menu_fingerprint_h = 'Al examinar la evidencia e identificar la identificación de la huella digital de la persona'
     },
     menu = {
         garage_title = 'Vehiculos policia',
@@ -171,18 +172,19 @@ local Translations = {
         evd_drawer_b = 'Puede acceder al cajón introduciendo un número de evidencia',
         evd_stash_h = 'Evidencias Generales',
         evd_stash_b = 'El armario de evidencia que puede usar en general',
-        evd_research = 'Volver a buscar una evidencia',
         dty_onduty = 'En Servicio',
         dty_offduty = 'Fuera de Servicio',
         dty_beonduty = 'Entrar de servicio',
         dty_beoffduty = 'Salir de Servicio',
         spawn_heli = 'Sacar Helicóptero',
         remove_heli = 'Guardar Helicóptero',
+        close_x = 'Cerrar Menú',
+        evd_research = 'Investigar la evidencia',
         tow_menu_header_b = 'Vehículo: %{vehicle} <br>Matrícula:%{plate}',
         tow_menu_depot_h = 'Depósito',
-        tow_menu_depot_b = 'Puede enviar el vehículo a los garajes de incautación y puede escribir un ticket',
-        tow_menu_impound_h = 'Incautar',
-        tow_menu_impound_b = 'Puede enviar el vehículo a los garajes de incautación en el edificio de la policía y puede escribir una multa',
+        tow_menu_depot_b = 'Puede enviar el vehículo al depósito por un precio a pagar',
+        tow_menu_impound_h = 'Depósito',
+        tow_menu_impound_b = 'Puede enviar el vehículo al depósito por un precio a pagar',
     },
     email = {
         sender = 'Agencia Central de morosos',
@@ -221,7 +223,6 @@ local Translations = {
         civilian_call = 'Llamada civil',
         emergency_call = 'Nueva llamada al 911',
         fine = 'Multar una persona'
-        
     },
     progressbar = {
         blood_clear = 'Limpiar la sangre ...',
@@ -230,7 +231,7 @@ local Translations = {
         place_object = 'Colocación del objeto ..',
         remove_object = 'Eliminar objeto ..',
         impound = 'Incautación de vehículo..',
-        researchevidence = 'Inspeccionando pruebas',
+        researchevidence = 'Inspección de pruebas',
         examining = 'Examinando %{label}'
     },
 }
