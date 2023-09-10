@@ -701,15 +701,15 @@ QBCore.Functions.CreateCallback('police:server:GetEvidenceByType', function(sour
     for k,v in pairs(EvidenceBags) do
         if v.info.type == type then
             if type == 'casing' then
-                if v.info.serie == 'Unknown' then
+                if v.info.serie == Lang:t('info.unknown') then
                     ItemList[#ItemList+1] = v
                 end
             elseif type == 'blood' then
-                if v.info.dnalabel == 'Unknown' then
+                if v.info.dnalabel == Lang:t('info.unknown') then
                     ItemList[#ItemList+1] = v
                 end
             elseif type == 'fingerprint' then
-                if v.info.fingerprint == 'Unknown' then
+                if v.info.fingerprint == Lang:t('info.unknown') then
                     ItemList[#ItemList+1] = v
                 end
             end
