@@ -58,6 +58,7 @@ local Translations = {
         impounded = 'Vehículo incautado..',
         beingonduty = 'Has entrado de servicio.',
         beingoffduty = 'Has salido de servicio',
+        cuffed_player = 'Has esposado correctamente al civil'
     },
     info = {
         mr = 'Sr.',
@@ -178,6 +179,8 @@ local Translations = {
         dty_beoffduty = 'Salir de Servicio',
         spawn_heli = 'Sacar Helicóptero',
         remove_heli = 'Guardar Helicóptero',
+        close_x = 'Cerrar Menú',
+        evd_research = 'Investigar la evidencia',
         tow_menu_header_b = 'Vehículo: %{vehicle} <br>Matrícula:%{plate}',
         tow_menu_depot_h = 'Depósito',
         tow_menu_depot_b = 'Puede enviar el vehículo a los garajes de incautación y puede escribir un ticket',

@@ -52,6 +52,15 @@ v1.3.5
 - Fixed lab evidence menu not showing with blood or fingerprint (thnx @ F7)
 - Disabled police running / jumping when escorting someone
 
+v1.3.6
+
+- Fixed the error from target when starting the script up
+- Optimized the blip system
+- Added color options for each seperate LEO job (bcso = orange, police = blue, sasp = green etc.)
+- Added leo-gps item for activating / deactivating the blips (inside images folder)
+- When you loose or drop your gps item, your blip will be deleted (when someone robs you and gets your gps)
+- Different blip sprites depending on vehicle type (heli, boats, plane, motorbike, emergency vehicles and for all other vehicles)
+
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
 - Citizen ID based armory (Whitelisted)
@@ -82,6 +91,8 @@ v1.3.5
 	['ziptie'] 				 	 	 = {['name'] = 'ziptie', 			    		['label'] = 'ZipTie', 					['weight'] = 50, 		['type'] = 'item', 		['image'] = 'ziptie.png', 				['unique'] = false, 	['useable'] = true, 	['shouldClose'] = true,	   ['combinable'] = nil,   ['description'] = 'Comes in handy when people misbehave. Maybe it can be used for something else?'},
 	['flush_cutter'] 				 = {['name'] = 'flush_cutter', 			    	['label'] = 'Flush Cutter', 			['weight'] = 50, 		['type'] = 'item', 		['image'] = 'flush_cutter.png', 		['unique'] = false, 	['useable'] = true, 	['shouldClose'] = true,	   ['combinable'] = nil,   ['description'] = 'Comes in handy when you want to cut zipties..'},
 	['bolt_cutter'] 				 = {['name'] = 'bolt_cutter', 			    	['label'] = 'Bolt Cutter', 				['weight'] = 50, 		['type'] = 'item', 		['image'] = 'bolt_cutter.png', 			['unique'] = false, 	['useable'] = true, 	['shouldClose'] = true,	   ['combinable'] = nil,   ['description'] = 'Wanna cut some metal items ?'},
+        ['leo-gps']                         = {['name'] = 'leo-gps',                           ['label'] = 'LEO GPS',                   ['weight'] = 2000,         ['type'] = 'item',         ['image'] = 'leo-gps.png',                 ['unique'] = true,          ['useable'] = true,      ['shouldClose'] = true,      ['combinable'] = nil,   ['description'] = 'Show your gps location to others'},
+
 
 ```
 

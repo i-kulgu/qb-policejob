@@ -9,27 +9,32 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local updatingCops = false
 local CuffedPlayers = {}
 local seckey = "hidev-"..math.random(111111, 999999)
+local GPSTable = {}
 
 -- Functions
 local function UpdateBlips()
     local dutyPlayers = {}
-    local players = QBCore.Functions.GetQBPlayers()
-    for _, v in pairs(players) do
-        if v and (v.PlayerData.job.type == "leo" or v.PlayerData.job.name == "ambulance" or v.PlayerData.job.type == "ems") and v.PlayerData.job.onduty then
-            local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
-            local heading = GetEntityHeading(GetPlayerPed(v.PlayerData.source))
-            dutyPlayers[#dutyPlayers+1] = {
-                source = v.PlayerData.source,
-                label = v.PlayerData.metadata["callsign"],
-                job = v.PlayerData.job.name,
-                location = {
-                    x = coords.x,
-                    y = coords.y,
-                    z = coords.z,
-                    w = heading
-                }
+    for k, v in pairs(GPSTable) do
+        local ply = k
+        local coords = GetEntityCoords(GetPlayerPed(ply))
+        local heading = GetEntityHeading(GetPlayerPed(ply))
+        dutyPlayers[#dutyPlayers+1] = {
+            source = ply,
+            label = v.call,
+            vehClass = v.vehClass,
+            job = v.job,
+            gpsactive = v.gpsactive,
+            location = {
+                x = coords.x,
+                y = coords.y,
+                z = coords.z,
+                w = heading
             }
-            TriggerClientEvent("police:client:UpdateBlips", v.PlayerData.source, dutyPlayers)
+        }
+    end
+    for k, v in pairs(GPSTable) do
+        if k == v.source then
+            TriggerClientEvent("police:client:UpdateBlips", k, dutyPlayers)
         end
     end
 end
@@ -545,10 +550,24 @@ QBCore.Functions.CreateUseableItem('filled_evidence_bag', function(source, item)
     end
 end)
 
+QBCore.Functions.CreateUseableItem('leo-gps', function(source, item)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+
+    if Player and Player.PlayerData.job.type == "leo" then
+        TriggerClientEvent('police:client:UseGPS', src)
+    end
+end)
+
 -- Callbacks
 QBCore.Functions.CreateCallback('police:server:isPlayerDead', function(_, cb, playerId)
     local Player = QBCore.Functions.GetPlayer(playerId)
     cb(Player.PlayerData.metadata["isdead"])
+end)
+
+QBCore.Functions.CreateCallback('police:server:isPlayerLast', function(_, cb, playerId)
+    local Player = QBCore.Functions.GetPlayer(playerId)
+    cb(Player.PlayerData.metadata["inlaststand"])
 end)
 
 QBCore.Functions.CreateCallback('police:GetPlayerStatus', function(_, cb, playerId)
@@ -851,7 +870,7 @@ RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
 
-    if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] then
+    if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] or EscortPlayer.PlayerData.metadata["inlaststand"] then
         TriggerClientEvent("police:client:SetOutVehicle", EscortPlayer.PlayerData.source)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.not_cuffed_dead"), 'error')
@@ -869,7 +888,7 @@ RegisterNetEvent('police:server:PutPlayerInVehicle', function(playerId)
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
 
-    if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] then
+    if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] or EscortPlayer.PlayerData.metadata["inlaststand"] then
         TriggerClientEvent("police:client:PutInVehicle", EscortPlayer.PlayerData.source)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.not_cuffed_dead"), 'error')
@@ -1261,7 +1280,6 @@ RegisterNetEvent('police:server:setEvidenceBagNote', function(item, note)
 end)
 
 RegisterNetEvent('police:server:AddRemove', function(itemname, amount, action, src, hash)
-    print(src)
     local Player = QBCore.Functions.GetPlayer(src)
     if not Player then return end
     if hash ~= seckey then DropPlayer(src, "Attempted exploit abuse") end
@@ -1294,6 +1312,17 @@ RegisterNetEvent('police:server:UpdateEvidenceBag', function(Item, Slot)
     end
 end)
 
+RegisterNetEvent('police:server:UpdateBlipInfo',function(data)
+    local player = source
+    if (not GPSTable[player] or (GPSTable[player].vehClass ~= data.vehClass or GPSTable[player].job ~= data.playerJob or GPSTable[player].gpsactive ~= data.gpsactive)) and player then GPSTable[player] = {vehClass = data.vehClass, job = data.playerJob, call = data.call, source = player, gpsactive = data.gpsactive} end
+end)
+
+RegisterNetEvent('police:server:SetCallSign', function(callsign)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    Player.Functions.SetMetaData("callsign", callsign)
+end)
+
 -- Threads
 CreateThread(function()
     while true do
@@ -1305,7 +1334,7 @@ end)
 
 CreateThread(function()
     while true do
-        Wait(5000)
+        Wait(1000)
         UpdateBlips()
     end
 end)

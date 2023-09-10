@@ -39,6 +39,7 @@ local Translations = {
         not_enough_money = 'You don\'t have enough money on you!',
         break_out = 'The suspect have broken out from cuffing !',
         dont_have_evidence_bag = 'You don\'t have evidence bag',
+        ondutyonly = "For onduty police only!"
     },
     success = {
         uncuffed = 'You have been uncuffed',
@@ -185,6 +186,10 @@ local Translations = {
         tow_menu_depot_b = 'You can send the car to impound garages and can write a ticket',
         tow_menu_impound_h = 'Impound',
         tow_menu_impound_b = 'You can send the vehicle to the impound garages in the police building and can write a ticket',
+        gps_offline = 'GPS is offline',
+        gps_online = 'GPS is online',
+        activate_gps = 'Activate GPS',
+        deactivate_gps = 'Deactivate GPS',
     },
     email = {
         sender = 'Central Judicial Collection Agency',

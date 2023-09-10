@@ -1392,7 +1392,7 @@ if Config.UseTarget then
             })
         end
 
-        AddTargetBone('seat_dside_f', {
+        AddTargetBone(`seat_dside_f`, {
             Options  = {
                 icon  = 'fa-solid fa-car-burst',
                 label = Lang:t("info.tow_vehicle"),

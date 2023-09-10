@@ -31,6 +31,12 @@ Config.CuffItems = {
     ['ziptie'] = {itemname = "ziptie", propname = "ba_prop_battle_cuffs", needkey = false, keyitem = "flush_cutter", cufftype = 49}
 }
 
+Config.BlipColors = {
+    ['police'] = 29,
+    ['bcso'] = 47,
+    ['sasp'] = 1
+}
+
 Config.FuelScript = 'LegacyFuel'
 Config.Inventory = 'qb-inventory'
 Config.LicenseRank = 2
@@ -92,8 +98,8 @@ Config.Locations = {
     },
     ["stations"] = {
         [1] = {label = "Los Santos Police Department", coords = vector4(428.23, -984.28, 29.76, 3.5), sprite= 137, scale= 0.7, colour= 29},
-        [2] = {label = "San Andreas State Prison", coords = vector4(1845.903, 2585.873, 45.672, 272.249), sprite= 137, scale= 0.7, colour= 29},
-        [3] = {label = "Blaine County Sheriffs Office", coords = vector4(-448.26, 6007.83, 44.01, 225.93), sprite= 137, scale= 0.7, colour= 29},
+        [2] = {label = "San Andreas State Prison", coords = vector4(1845.903, 2585.873, 45.672, 272.249), sprite= 137, scale= 0.7, colour= 1},
+        [3] = {label = "Blaine County Sheriffs Office", coords = vector4(-448.26, 6007.83, 44.01, 225.93), sprite= 137, scale= 0.7, colour= 47},
     },
 }
 

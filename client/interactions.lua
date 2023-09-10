@@ -415,7 +415,7 @@ RegisterNetEvent('police:client:GetEscorted', function(playerId)
     end)
 end)
 
-RegisterNetEvent('police:client:setEscortStatus', function(bool) isEscortingPlayer = bool print('Escorting player') end)
+RegisterNetEvent('police:client:setEscortStatus', function(bool) isEscortingPlayer = bool end)
 
 RegisterNetEvent('police:client:DeEscort', function()
     isEscorted = false
