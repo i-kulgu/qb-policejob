@@ -1,3 +1,6 @@
+#Warning : new version is available from tebex : https://i-kulgu.tebex.io/package/5921009
+## This version on github is only for reference and not a working version without the bridge !
+
 # qb-policejob
 Police Job for QB-Core Framework :police_officer:
 
