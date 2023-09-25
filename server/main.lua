@@ -554,7 +554,7 @@ QBCore.Functions.CreateUseableItem('leo-gps', function(source, item)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 
-    if Player and Player.PlayerData.job.type == "leo" then
+    if Player and Player.PlayerData.job.type == "leo" or Player.PlayerData.job.type == "ems" then
         TriggerClientEvent('police:client:UseGPS', src)
     end
 end)
@@ -695,7 +695,7 @@ end)
 QBCore.Functions.CreateCallback('police:server:GetEvidenceByType', function(source, cb, type)
     local Player = QBCore.Functions.GetPlayer(source)
     local EvidenceBags = exports[Config.Inventory]:GetItemsByName(source, 'filled_evidence_bag')
-
+    if not EvidenceBags then TriggerClientEvent('QBCore:Notify', source, Lang:t('error.dont_have_evidence_bag'), 'error') end
     local ItemList = {}
     
     for k,v in pairs(EvidenceBags) do
@@ -716,9 +716,9 @@ QBCore.Functions.CreateCallback('police:server:GetEvidenceByType', function(sour
         end
     end
 
-    if ItemList[1] then
+    -- if ItemList[1] then
         cb(ItemList)
-    end
+    -- end
 end)
 
 QBCore.Functions.CreateCallback('police:server:HasImpoundPrice', function(source, cb, amount)
@@ -832,7 +832,8 @@ RegisterNetEvent('police:server:EscortPlayer', function(playerId)
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not Player or not EscortPlayer then return end
 
-    if (Player.PlayerData.job.type == "leo" or Player.PlayerData.job.name == "ambulance" or Player.PlayerData.job.type == "ems") or (EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] or EscortPlayer.PlayerData.metadata["inlaststand"]) then
+    if (Player.PlayerData.job.type == "leo" or Player.PlayerData.job.type == "ems") or (EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] or EscortPlayer.PlayerData.metadata["inlaststand"]) then
+        TriggerClientEvent('police:client:EscortAnimation', src)
         TriggerClientEvent("police:client:GetEscorted", EscortPlayer.PlayerData.source, Player.PlayerData.source)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.not_cuffed_dead"), 'error')
@@ -889,6 +890,7 @@ RegisterNetEvent('police:server:PutPlayerInVehicle', function(playerId)
     if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
 
     if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] or EscortPlayer.PlayerData.metadata["inlaststand"] then
+        TriggerClientEvent('police:client:setEscortStatus', src, false)
         TriggerClientEvent("police:client:PutInVehicle", EscortPlayer.PlayerData.source)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.not_cuffed_dead"), 'error')
@@ -1337,4 +1339,9 @@ CreateThread(function()
         Wait(1000)
         UpdateBlips()
     end
+end)
+
+AddEventHandler("playerDropped", function(reason)
+    local src = source
+    if src and GPSTable[src] then GPSTable[src] = nil end
 end)

@@ -2,10 +2,11 @@ fx_version 'cerulean'
 game 'gta5'
 
 description 'QB-PoliceJob'
-version '1.3.6'
+version '1.3.7'
 
 shared_scripts {
     'config.lua',
+    '@ox_lib/init.lua',
     '@qb-core/shared/locale.lua',
     'locales/en.lua',
     'locales/*.lua'

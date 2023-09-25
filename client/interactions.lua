@@ -403,7 +403,7 @@ RegisterNetEvent('police:client:GetEscorted', function(playerId)
                 isEscorted = true
                 local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
                 TriggerServerEvent('police:server:isEscortingPlayer', true, playerId)
-                SetEntityCoords(ped, GetOffsetFromEntityInWorldCoords(dragger, 0.0, 0.45, 0.0))
+                SetEntityCoords(ped, GetOffsetFromEntityInWorldCoords(dragger, 0.0, 0.25, 0.0))
                 AttachEntityToEntity(ped, dragger, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
             else
                 isEscorted = false
@@ -496,7 +496,7 @@ RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
                         success = false
                         TriggerServerEvent('qb-policejob:server:NotifyOtherPlayer', source, Lang:t('success.cuffed_player'), 'success', 3500)
                     end
-                end, 2, 20) -- NumberOfCircles, MS
+                end, Config.PSUICOnfig.numcircle, Config.PSUICOnfig.ms) -- NumberOfCircles, MS
             end
             while success == nil do Wait(10) end
         end

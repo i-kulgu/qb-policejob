@@ -67,7 +67,6 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     PlayerJob = player.job
     isHandcuffed = false
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
-    TriggerServerEvent("police:server:UpdateBlips")
     TriggerServerEvent("police:server:UpdateCurrentCops")
 
     if player.metadata.tracker then
@@ -109,7 +108,6 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
-    TriggerServerEvent('police:server:UpdateBlips')
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
     TriggerServerEvent("police:server:UpdateCurrentCops")
     isHandcuffed = false
@@ -139,11 +137,11 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
         DutyBlips = {}
     end
     PlayerJob = JobInfo
-    TriggerServerEvent("police:server:UpdateBlips")
 end)
 
 AddEventHandler('onResourceStart', function(resource)
    if resource == GetCurrentResourceName() then
+    PlayerJob = QBCore.Functions.GetPlayerData().job
     QBCore.Functions.TriggerCallback('police:server:getSecureKey', function(result)
         SecKey = result
     end)
@@ -237,7 +235,7 @@ RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
 end)
 
 RegisterNetEvent('police:client:UseGPS', function()
-    if PlayerJob.type == 'leo' and PlayerJob.onduty then
+    if (PlayerJob.type == 'leo' or PlayerJob.type == 'ems') and PlayerJob.onduty then
         local newinputs = {}
         if not GPSActive then
             HeaderText = "GPS - "..PlayerJob.name.."<br>🔴 "..Lang:t('menu.gps_offline')
@@ -278,7 +276,7 @@ end)
 
 CreateThread(function()
     while true do
-        if PlayerJob.type == 'leo' and PlayerJob.onduty then
+        if (PlayerJob.type == 'leo' or PlayerJob.type == 'ems') and PlayerJob.onduty and GPSActive then
             local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
             local vehicleClass = GetVehicleClass(vehicle)
             local jobname = PlayerJob.name

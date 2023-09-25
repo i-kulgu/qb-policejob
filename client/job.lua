@@ -73,7 +73,7 @@ local function SetCarItemsInfo()
 end
 
 local function closeMenuFull()
-    exports['qb-menu']:closeMenu()
+    ContextSystem.Close()
 end
 
 local function doCarDamage(currentVehicle, veh)
@@ -211,12 +211,7 @@ local function SetWeaponSeries()
 end
 
 local function MenuGarage(currentSelection)
-    local vehicleMenu = {
-        {
-            header = Lang:t('menu.garage_title'),
-            isMenuHeader = true
-        }
-    }
+    local vehicleMenu = {}
 
     local authorizedVehicles = Config.AuthorizedVehicles[currentSelection]
     for veh, data in pairs(authorizedVehicles) do
@@ -226,9 +221,10 @@ local function MenuGarage(currentSelection)
                     for _,v in pairs(data.ranks) do
                         if v == PlayerJob.grade.level then
                             vehicleMenu[#vehicleMenu+1] = {
-                                header = data.label,
-                                txt = "",
-                                params = {
+                                opthead = data.label,
+                                optdesc = "",
+                                opticon = "",
+                                optparams = {
                                     event = "police:client:VehicleSubMenu",
                                     args = {
                                         vehicle = veh,
@@ -251,15 +247,16 @@ local function MenuGarage(currentSelection)
                     local vehprice, pricetext
                     if data.price then
                         vehprice = data.price
-                        pricetext = "- Price : $"..data.price
+                        pricetext = "Price : $"..data.price
                     else
                         vehprice = 0
-                        pricetext = "- Price : Free"
+                        pricetext = "Price : Free"
                     end
                     vehicleMenu[#vehicleMenu+1] = {
-                        header = data.label,
-                        txt = pricetext,
-                        params = {
+                        opthead = data.label,
+                        optdesc = pricetext,
+                        opticon = "",
+                        optparams = {
                             event = "police:client:VehicleSubMenu",
                             args = {
                                 vehicle = veh,
@@ -275,41 +272,38 @@ local function MenuGarage(currentSelection)
             end
         end
     end
-
-    vehicleMenu[#vehicleMenu+1] = {
-        header = Lang:t('menu.close'),
-        txt = "",
-        params = {
-            event = "qb-menu:client:closeMenu"
-        }
-
+    local header = {
+        disabled = true,
+        header = Lang:t('menu.garage_title'),
+        headerid = 'police_garage_menu', -- unique
+        desc = '',
+        icon = "warehouse"
     }
-    exports['qb-menu']:openMenu(vehicleMenu)
+    ContextSystem.Open(header, vehicleMenu)
 end
 
 
 local function MenuImpound(currentSelection)
-    local impoundMenu = {
-        {
-            header = Lang:t('menu.impound'),
-            isMenuHeader = true
-        }
-    } 
     QBCore.Functions.TriggerCallback("police:GetImpoundedVehicles", function(result)
-        local shouldContinue = false
         if result == nil then
             QBCore.Functions.Notify(Lang:t("error.no_impound"), "error", 5000)
         else
-            shouldContinue = true
+            local header = {
+                disabled = true,
+                header = Lang:t('menu.impound'),
+                headerid = 'police_impound_menu', -- unique
+                desc = '',
+                icon = "car-tunnel"
+            }
             for _ , v in pairs(result) do
                 local enginePercent = QBCore.Shared.Round(v.engine / 10, 0)
                 local currentFuel = v.fuel
                 local vname = QBCore.Shared.Vehicles[v.vehicle].name
 
                 impoundMenu[#impoundMenu+1] = {
-                    header = vname.." ["..v.plate.."]",
-                    txt =  Lang:t('info.vehicle_info', {billvalue = v.depotprice, value = enginePercent, value2 = currentFuel}),
-                    params = {
+                    optheader = vname.." ["..v.plate.."]",
+                    optdesc =  Lang:t('info.vehicle_info', {billvalue = v.depotprice, value = enginePercent, value2 = currentFuel}),
+                    optparams = {
                         event = "police:client:TakeOutImpound",
                         args = {
                             vehicle = v,
@@ -319,17 +313,7 @@ local function MenuImpound(currentSelection)
                     }
                 }
             end
-        end
-
-        if shouldContinue then
-            impoundMenu[#impoundMenu+1] = {
-                header = Lang:t('menu.close'),
-                txt = "",
-                params = {
-                    event = "qb-menu:client:closeMenu"
-                }
-            }
-            exports['qb-menu']:openMenu(impoundMenu)
+            ContextSystem.Open(header, impoundMenu)
         end
     end)
 end
@@ -579,14 +563,20 @@ end)
 RegisterNetEvent('police:client:VehicleSubMenu', function(data)
     local vehLabel = data.vehlabel
     local SubMenu = {}
-    SubMenu[#SubMenu+1] = {header = vehLabel.." Menu", txt = "Take out or return your vehicle", isMenuHeader = true}
     if data.out then
-        SubMenu[#SubMenu+1] = {header = 'Return '..vehLabel, txt = "", params = {event = "police:client:ReturnVehicle", args = {car = data.car}}}
+        SubMenu[#SubMenu+1] = {opthead = 'Return '..vehLabel, optdesc = "", opticon = 'car', optparams = {event = "police:client:ReturnVehicle", args = {car = data.car}}}
         table.remove(PDCar, data.tableid)
     else
-        SubMenu[#SubMenu+1] = {header = 'Take out '..vehLabel, txt = "Take out for $"..data.price, params = {event = "police:client:TakeOutVehicle", args = {vehicle = data.vehicle, currentSelection = data.currentSelection, livery = data.livery, price = data.price}}}
+        SubMenu[#SubMenu+1] = {opthead = 'Take out '..vehLabel, optdesc = "Take out for $"..data.price, opticon = 'car', optparams = {event = "police:client:TakeOutVehicle", args = {vehicle = data.vehicle, currentSelection = data.currentSelection, livery = data.livery, price = data.price}}}
     end
-    exports['qb-menu']:openMenu(SubMenu)
+    local newHeader = {
+        disabled = true,
+        header = vehLabel.." Menu",
+        headerid = 'police_vehicle_submenu', -- unique
+        desc = 'Take out or return your vehicle',
+        icon = "retweet"
+    }
+    ContextSystem.Open(newHeader, SubMenu)
 end)
 
 RegisterNetEvent('police:client:TakeOutVehicle', function(data)
@@ -639,32 +629,31 @@ RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
         end
 
     else
-        exports['qb-menu']:closeMenu()
+        ContextSystem.Close()
     end
 end)
 
 RegisterNetEvent('qb-policejob:ToggleDuty', function()
-    local PlayerData = QBCore.Functions.GetPlayerData()
     local dutymenu = {}
 
-    if PlayerData.job.onduty then dutystatus = '🟢 ' .. Lang:t('menu.dty_onduty') else dutystatus = '🔴 ' .. Lang:t('menu.dty_offduty') end
+    if PlayerJob.onduty then dutystatus = '🟢 ' .. Lang:t('menu.dty_onduty') else dutystatus = '🔴 ' .. Lang:t('menu.dty_offduty') end
 
-    dutymenu[#dutymenu + 1] = {isMenuHeader = true, header = PlayerData.job.label, txt = 'Your duty status: '..dutystatus}
-
-    if PlayerData.job.onduty then
-        dutymenu[#dutymenu + 1] = { header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature', disabled = true,
-            params = {event = '', args = { }}}
-        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature',
-            params = {isServer = true, event = 'police:server:changeDuty', args = { duty = false}}}
+    local header = {
+        disabled = true,
+        header = PlayerJob.label,
+        headerid = 'police_duty_menu', -- unique
+        desc = 'Your duty status: '..dutystatus,
+        icon = "retweet"
+    }
+    if PlayerJob.onduty then
+        dutymenu[#dutymenu + 1] = {opthead = Lang:t('menu.dty_beonduty'), optdesc = '', opticon = 'signature', optdisabled = true}
+        dutymenu[#dutymenu + 1] = {opthead = Lang:t('menu.dty_beoffduty'), optdesc = '', opticon = 'signature', optparams = {isServer = true, event = 'police:server:changeDuty', args = { duty = false}}}
     else
-        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature',
-            params = {isServer = true, event = 'police:server:changeDuty',args = {duty = true}}}
-        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature', disabled = true,
-            params = {event = '', args = { }}}
-    end exports['qb-menu']:openMenu(dutymenu)
-
+        dutymenu[#dutymenu + 1] = {opthead = Lang:t('menu.dty_beonduty'), optdesc = '', opticon = 'fa-solid fa-signature', optparams = {isServer = true, event = 'police:server:changeDuty',args = {duty = true}}}
+        dutymenu[#dutymenu + 1] = {opthead = Lang:t('menu.dty_beoffduty'), optdesc = '', opticon = 'fa-solid fa-signature', optdisabled = true}
+    end
+    ContextSystem.Open(header, dutymenu)
     TriggerServerEvent("police:server:UpdateCurrentCops")
-    TriggerServerEvent("police:server:UpdateBlips")
 end)
 
 RegisterNetEvent('qb-police:client:scanFingerPrint', function()
@@ -743,12 +732,18 @@ RegisterNetEvent('policejob:client:VehicleLiveryMenu', function(data)
     local vehicle = data.vehicle
     local liveries = getVehicleLiveries(vehicle)
     local LiveryMenu = {}
-    LiveryMenu[#LiveryMenu+1] = {header = "Choose your livery", txt = '', isMenuHeader = true}
-    LiveryMenu[#LiveryMenu+1] = {header = '', txt = '❌ Close'}
     for k,v in pairs(liveries) do
-        LiveryMenu[#LiveryMenu+1] = {header = v.name, txt = 'Change livery to '.. v.name, params = {event = 'police:client:ChangeLivery', args = {id = v.id}}}
+        LiveryMenu[#LiveryMenu+1] = {opthead = v.name, optdesc = 'Change livery to '.. v.name, opticon = 'brush', optparams = {event = 'police:client:ChangeLivery', args = {id = v.id}}}
     end
-    exports['qb-menu']:openMenu(LiveryMenu)
+
+    local header = {
+        disabled = true,
+        header = "Choose your livery",
+        headerid = 'police_vehiclelivery_menu', -- unique
+        desc = '',
+        icon = "palette"
+    }
+    ContextSystem.Open(header, LiveryMenu)
 end)
 
 RegisterNetEvent('police:client:ChangeLivery', function(data)
@@ -792,12 +787,17 @@ RegisterNetEvent('policejob:client:VehicleExtrasMenu', function(data)
     local vehicle = data.vehicle
     local extras = getVehicleExtras(vehicle)
     local ExtraMenu = {}
-    ExtraMenu[#ExtraMenu+1] = {header = 'Extras Menu', txt = 'Change your vehicle extras', isMenuHeader = true}
-    ExtraMenu[#ExtraMenu+1] = {header = '', txt = '❌ Close'}
     for k,v in pairs(extras) do
-        ExtraMenu[#ExtraMenu+1] = {header = 'Extra '.. v.id, txt = 'Change extra option '.. v.id, params = {event = 'police:client:ChangeExtra', args = {id = v.id, veh = vehicle}}}
+        ExtraMenu[#ExtraMenu+1] = {opthead = 'Extra '.. v.id, optdesc = 'Change extra option '.. v.id, opticon = 'caret-right', optparams = {event = 'police:client:ChangeExtra', args = {id = v.id, veh = vehicle}}}
     end
-    exports['qb-menu']:openMenu(ExtraMenu)
+    local header = {
+        disabled = true,
+        header = 'Extras Menu',
+        headerid = 'police_extras_menu', -- unique
+        desc = 'Change your vehicle extras',
+        icon = "plus"
+    }
+    ContextSystem.Open(header, ExtraMenu)
 end)
 
 RegisterNetEvent('police:client:ChangeExtra', function(data)
@@ -818,46 +818,26 @@ RegisterNetEvent('police:client:TowMenu', function(Vehicle, Plate)
     local Model = GetDisplayNameFromVehicleModel(GetEntityModel(Vehicle))
     local ModelBrand = QBCore.Shared.Vehicles[string.lower(Model)].brand
     local ModelName = QBCore.Shared.Vehicles[string.lower(Model)].name
-
-    exports['qb-menu']:openMenu({
-        {
-            header = Lang:t('info.tow_vehicle'),
-            txt = Lang:t('menu.tow_menu_header_b', {vehicle= ModelBrand..' '..ModelName, plate= Plate}),
-            isMenuHeader = true,
-        },
-        {
-            header = Lang:t('menu.tow_menu_depot_h'),
-            txt = Lang:t('menu.tow_menu_depot_b'),
-            icon = 'fa-solid fa-truck-pickup',
-            params = {
-                event = 'police:client:Tow',
-                args = {
-                    type = 'depot',
-                    plate = Plate,
-                    model = ModelName,
-		            vehicle = Vehicle
-                }
-            }
-        },
-        {
-            header = Lang:t('menu.tow_menu_impound_h'),
-            txt = Lang:t('menu.tow_menu_impound_b'),
-            icon = 'fa-solid fa-shield',
-            params = {
-                event = 'police:client:Tow',
-                args = {
-                    type = 'impound',
-                    plate = Plate,
-                    model = ModelName,
-		            vehicle = Vehicle
-                }
-            }
-        },
-        {
-            header = Lang:t('menu.close_x'),
-            icon = 'fa-solid fa-xmark'
-        }
-    })
+    local TowMenu = {}
+    TowMenu[#TowMenu+1] = {opthead = Lang:t('menu.tow_menu_depot_h'), optdesc = Lang:t('menu.tow_menu_depot_b'), opticon = 'truck-pickup',
+    optparams = {
+        event = 'police:client:Tow',
+        args = { type = 'depot', plate = Plate, model = ModelName, vehicle = Vehicle}
+    }}
+    TowMenu[#TowMenu+1] = {opthead = Lang:t('menu.tow_menu_impound_h'), optdesc = Lang:t('menu.tow_menu_impound_b'), opticon = 'shield',
+    optparams = {
+        event = 'police:client:Tow',
+        args = {type = 'impound', plate = Plate, model = ModelName, vehicle = Vehicle}
+    }}
+    TowMenu[#TowMenu+1] = {opthead = Lang:t('menu.close_x'), opticon = 'xmark'}
+    local header = {
+        disabled = true,
+        header = Lang:t('info.tow_vehicle'),
+        headerid = 'police_tow_menu', -- unique
+        desc = Lang:t('menu.tow_menu_header_b', {vehicle= ModelBrand..' '..ModelName, plate= Plate}),
+        icon = "car-tunnel"
+    }
+    ContextSystem.Open(header, TowMenu)
 end)
 
 RegisterNetEvent('police:client:Tow', function(Data)
@@ -929,27 +909,7 @@ local function dutylistener()
         while dutylisten do
             if PlayerJob.type == "leo" then
                 if IsControlJustReleased(0, 38) then
-                    local PlayerData = QBCore.Functions.GetPlayerData()
-                    local dutymenu = {}
-
-                    if PlayerData.job.onduty then dutystatus = '🟢 ' .. Lang:t('menu.dty_onduty') else dutystatus = '🔴 ' .. Lang:t('menu.dty_offduty') end
-
-                    dutymenu[#dutymenu + 1] = {isMenuHeader = true, header = PlayerData.job.label, txt = 'Your duty status: '..dutystatus}
-
-                    if PlayerData.job.onduty then
-                        dutymenu[#dutymenu + 1] = { header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature', disabled = true,
-                            params = {event = '', args = { }}}
-                        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature',
-                            params = {isServer = true, event = 'police:server:changeDuty', args = { duty = false}}}
-                    else
-                        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beonduty'), icon = 'fa-solid fa-signature',
-                            params = {isServer = true, event = 'police:server:changeDuty',args = {duty = true}}}
-                        dutymenu[#dutymenu + 1] = {header = '', txt = Lang:t('menu.dty_beoffduty'), icon = 'fa-solid fa-signature', disabled = true,
-                            params = {event = '', args = { }}}
-                    end exports['qb-menu']:openMenu(dutymenu)
-
-                    TriggerServerEvent("police:server:UpdateCurrentCops")
-                    TriggerServerEvent("police:server:UpdateBlips")
+                    TriggerEvent('qb-policejob:ToggleDuty')
                     dutylisten = false
                     break
                 end
@@ -1109,6 +1069,22 @@ local function impound()
     end)
 end
 
+local function ImpoundVehicleMenu(selection)
+    CreateThread(function()
+        while true do
+            Wait(0)
+            if inImpound and PlayerJob.type == "leo" then
+                if IsControlJustReleased(0, 38) then
+                    TriggerEvent('police:client:ImpoundMenuHeader', selection)
+                    break
+                end
+            else
+                break
+            end
+        end
+    end)
+end
+
 -- Police Garage Thread
 local function garage()
     CreateThread(function()
@@ -1121,6 +1097,23 @@ local function garage()
                         QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(PlayerPedId()))
                         break
                     end
+                end
+            else
+                break
+            end
+        end
+    end)
+end
+
+local function TakeVehicleMenu(curgarage)
+    CreateThread(function()
+        while true do
+            Wait(0)
+            if inGarage and PlayerJob.type == "leo" then
+                if PlayerJob.onduty then sleep = 5 end
+                if IsControlJustReleased(0, 38) then
+                    TriggerEvent('police:client:VehicleMenuHeader')
+                    break
                 end
             else
                 break
@@ -1261,38 +1254,25 @@ if Config.UseTarget then
                                     currentEvidence = k
                                 end
                             end
-
-                            exports['qb-menu']:openMenu({
-                                {
-                                    header = QBCore.Functions.GetPlayerData().job.label,
-                                    icon = 'fa-solid fa-building-shield',
-                                    isMenuHeader = true,
-                                },
-                                {
-                                    header = Lang:t('menu.evd_drawer_h'),
-                                    txt = Lang:t('menu.evd_drawer_b'),
-                                    icon = 'fa-solid fa-list-ol',
-                                    params = {
-                                        event = 'police:client:EvidenceStashDrawer',
-                                        args = {
-                                            type = 'drawer',
-                                            number = currentEvidence
-                                        }
-                                    }
-                                },
-                                {
-                                    header = Lang:t('menu.evd_stash_h'),
-                                    txt = Lang:t('menu.evd_stash_b'),
-                                    icon = 'fa-solid fa-folder-closed',
-                                    params = {
-                                        event = 'police:client:EvidenceStashDrawer',
-                                        args = {
-                                            type = 'stash',
-                                            number = currentEvidence
-                                        }
-                                    }
-                                },
-                            })
+                            local EvidenceStash = {}
+                            EvidenceStash[#EvidenceStash+1] = {opthead = Lang:t('menu.evd_drawer_h'), optdesc = Lang:t('menu.evd_drawer_b'), opticon = 'list-ol',
+                                optparams = {
+                                    event = 'police:client:EvidenceStashDrawer',
+                                    args = {type = 'drawer', number = currentEvidence}
+                                }}
+                            EvidenceStash[#EvidenceStash+1] = {opthead = Lang:t('menu.evd_stash_h'), optdesc = Lang:t('menu.evd_stash_b'), opticon = 'folder-closed',
+                                optparams = {
+                                    event = 'police:client:EvidenceStashDrawer',
+                                    args = {type = 'stash',number = currentEvidence}
+                                }}
+                            local header = {
+                                disabled = true,
+                                header = PlayerJob.label,
+                                headerid = 'police_evidencestash_menu', -- unique
+                                desc = '',
+                                icon = "building-shield"
+                            }
+                            ContextSystem.Open(header, EvidenceStash)
                         end,
                     },
                 },
@@ -1392,20 +1372,22 @@ if Config.UseTarget then
             })
         end
 
-        AddTargetBone(`seat_dside_f`, {
+        AddTargetBone('seat_dside_f', {
             Options  = {
-                icon  = 'fa-solid fa-car-burst',
-                label = Lang:t("info.tow_vehicle"),
-                canInteract = function()
-                    if PlayerJob.type == "leo" then return true end
-                end,
-                action = function()
-                    local Vehicle = QBCore.Functions.GetClosestVehicle()
-                    local Plate = QBCore.Functions.GetPlate(Vehicle)
-                    TriggerEvent('police:client:TowMenu', Vehicle, Plate)
-                end,
-            }}
-        )
+                {
+                    icon  = 'fa-solid fa-car-burst',
+                    label = Lang:t("info.tow_vehicle"),
+                    canInteract = function()
+                        if PlayerJob.type == "leo" then return true end
+                    end,
+                    action = function()
+                        local Vehicle = QBCore.Functions.GetClosestVehicle()
+                        local Plate = QBCore.Functions.GetPlate(Vehicle)
+                        TriggerEvent('police:client:TowMenu', Vehicle, Plate)
+                    end,
+                }
+            }
+        })
 
     end)
 
@@ -1562,30 +1544,28 @@ else
                         currentEvidence = k
                     end
                 end
-                exports['qb-menu']:openMenu({
-                    {header = QBCore.Functions.GetPlayerData().job.label, icon = 'fa-solid fa-building-shield', isMenuHeader = true},
-                    { header = Lang:t('menu.evd_drawer_h'), txt = Lang:t('menu.evd_drawer_b'), icon = 'fa-solid fa-list-ol',
-                        params = {
-                            event = 'police:client:EvidenceStashDrawer',
-                            args = {
-                                type = 'drawer',
-                                number = currentEvidence
-                            }
-                        }
-                    },
-                    { header = Lang:t('menu.evd_stash_h'), txt = Lang:t('menu.evd_stash_b'), icon = 'fa-solid fa-folder-closed',
-                        params = {
-                            event = 'police:client:EvidenceStashDrawer',
-                            args = {
-                                type = 'stash',
-                                number = currentEvidence
-                            }
-                        }
-                    },
-                })
+                local EvidenceStash = {}
+                EvidenceStash[#EvidenceStash+1] = {opthead = Lang:t('menu.evd_drawer_h'), optdesc = Lang:t('menu.evd_drawer_b'), opticon = 'list-ol',
+                    optparams = {
+                        event = 'police:client:EvidenceStashDrawer',
+                        args = {type = 'drawer', number = currentEvidence}
+                    }}
+                EvidenceStash[#EvidenceStash+1] = {opthead = Lang:t('menu.evd_stash_h'), optdesc = Lang:t('menu.evd_stash_b'), opticon = 'folder-closed',
+                    optparams = {
+                        event = 'police:client:EvidenceStashDrawer',
+                        args = {type = 'stash',number = currentEvidence}
+                    }}
+                local header = {
+                    disabled = true,
+                    header = PlayerJob.label,
+                    headerid = 'police_evidencestash_menu', -- unique
+                    desc = '',
+                    icon = "building-shield"
+                }
+                ContextSystem.Open(header, EvidenceStash)
             end
         else
-            exports['qb-menu']:closeMenu()
+            ContextSystem.Close()
         end
     end)
 
@@ -1608,31 +1588,23 @@ else
             if PlayerJob.name == 'police' and PlayerJob.onduty then
                 if IsPedInAnyVehicle(PlayerPedId(), false) then
                     exports['qb-core']:DrawText(Lang:t('info.store_veh'), 'left')
-            garage()
+                    garage()
                 else
-                    local currentSelection = 0
+                    local currentSelection
 
                     for k, v in pairs(Config.Locations["vehicle"]) do
                         if #(point - vector3(v.x, v.y, v.z)) < 4 then
                             currentSelection = k
                         end
                     end
-                    exports['qb-menu']:showHeader({
-                        {
-                            header = Lang:t('menu.pol_garage'),
-                            params = {
-                                event = 'police:client:VehicleMenuHeader',
-                                args = {
-                                    currentSelection = currentSelection,
-                                }
-                            }
-                        }
-                    })
+                    exports['qb-core']:DrawText(Lang:t('info.take_veh'), 'left')
+                    garageSelection = currentSelection
+                    TakeVehicleMenu()
                 end
             end
         else
             inGarage = false
-            exports['qb-menu']:closeMenu()
+            ContextSystem.Close()
             exports['qb-core']:HideText()
         end
     end)
@@ -1702,21 +1674,12 @@ CreateThread(function()
                         currentSelection = k
                     end
                 end
-                exports['qb-menu']:showHeader({
-                    {
-                        header = Lang:t('menu.pol_impound'),
-                        params = {
-                            event = 'police:client:ImpoundMenuHeader',
-                            args = {
-                                currentSelection = currentSelection,
-                            }
-                        }
-                    }
-                })
+                exports['qb-core']:DrawText(Lang:t('menu.pol_impound'), 'left')
+                ImpoundVehicleMenu(currentSelection)
             end
         else
             inImpound = false
-            exports['qb-menu']:closeMenu()
+            ContextSystem.Close()
             exports['qb-core']:HideText()
         end
     end)
@@ -1734,8 +1697,15 @@ RegisterCommand('liverymenu', function()
         return
     end
     LiveryMenu = {}
-    LiveryMenu[#LiveryMenu+1] = {header = "Livery Menu", txt = "", isMenuHeader = true }
-    LiveryMenu[#LiveryMenu+1] = {header = "Change Liveries", txt = "Change your vehicle liveries", params= {event = 'policejob:client:VehicleLiveryMenu', args = {vehicle = vehicle}}}
-    LiveryMenu[#LiveryMenu+1] = {header = "Change Extras", txt = "Change your vehicle extras", params= {event = 'policejob:client:VehicleExtrasMenu', args = {vehicle = vehicle}}}
-    exports['qb-menu']:openMenu(LiveryMenu)
+    LiveryMenu[#LiveryMenu+1] = {opthead = "Change Liveries", optdesc = "Change your vehicle liveries", opticon = 'brush', optparams= {event = 'policejob:client:VehicleLiveryMenu', args = {vehicle = vehicle}}}
+    LiveryMenu[#LiveryMenu+1] = {opthead = "Change Extras", optdesc = "Change your vehicle extras", opticon = 'brush', optparams= {event = 'policejob:client:VehicleExtrasMenu', args = {vehicle = vehicle}}}
+
+    local header = {
+        disabled = true,
+        header = "Livery Menu",
+        headerid = 'police_livery_menu', -- unique
+        desc = '',
+        icon = "palette"
+    }
+    ContextSystem.Open(header, LiveryMenu)
 end)

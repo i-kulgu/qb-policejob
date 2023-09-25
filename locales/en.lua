@@ -122,6 +122,7 @@ local Translations = {
         take_heli = '[E] Take Helicopter',
         impound_veh = '[E] - Impound Vehicle',
         store_veh = '[E] - Store Vehicle',
+        take_veh = '[E] - Take Vehicle',
         armory = 'Armory',
         enter_armory = '[E] Armory',
         finger_scan = 'Fingerprint Scanning',

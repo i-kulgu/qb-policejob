@@ -61,6 +61,15 @@ v1.3.6
 - When you loose or drop your gps item, your blip will be deleted (when someone robs you and gets your gps)
 - Different blip sprites depending on vehicle type (heli, boats, plane, motorbike, emergency vehicles and for all other vehicles)
 
+v1.3.7
+- Option to switch between ox_lib or qb-menu
+- Fixed the bug that you can't run when you put escorted player in vehicle
+- EMS job type can use GPS now, blip color is red (see config)
+- Fixed the targetbone not working for impound issue
+- Fixed the issue that blip was staying when player quits the game
+- PlayerJob is set automatically when restarting resource
+- Added config option for ps-ui circle game
+
 ### Existing
 - Classical requirements like on duty/off duty, clothing, vehicle, stash etc.
 - Citizen ID based armory (Whitelisted)

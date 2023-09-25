@@ -18,7 +18,9 @@ Config.CutCuffItem = 'bolt_cutter'
 Config.BrokenCuffItem = 'broken_handcuffs'
 Config.BreakOutCuffing = {active = true, duration = math.random(2500,5000), pos = math.random(10, 30), width = math.random(10, 20)}
 Config.BreakoutMinigame = 'qb-skillbar' -- Choose the cuff breakout minigame : qb-skillbar / ps-ui (circle)
+Config.PSUICOnfig = {numcircle = 2, ms = 20} -- If minigame is ps-ui then choose number of circles and ms 
 Config.TargetSystem = 'qb-target' -- Target system you want to use : qb-target / qtarget / ox_target
+Config.ContextSystem = 'qb-menu' -- Menu system you want to use : qb-menu / ox_lib
 Config.Debug = false -- Enable / Disable debugpoly 
 
 -- itemname = name of the item
@@ -32,9 +34,10 @@ Config.CuffItems = {
 }
 
 Config.BlipColors = {
-    ['police'] = 29,
-    ['bcso'] = 47,
-    ['sasp'] = 1
+    ['police'] = 29, -- Dark Blue
+    ['bcso'] = 47, -- Orange
+    ['sasp'] = 2, -- Green
+    ['ambulance'] = 1 -- Red
 }
 
 Config.FuelScript = 'LegacyFuel'

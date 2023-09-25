@@ -220,61 +220,32 @@ end)
 
 RegisterNetEvent('police:client:FindEvidenceBag', function()
     local PlayerData = QBCore.Functions.GetPlayerData()
-    exports['qb-menu']:openMenu({
-        {
-            header = PlayerData.job.label,
-            txt = '',
-            icon = 'fa-solid fa-microscope',
-            isMenuHeader = true,
-            params = {
-                event = '',
-                args = {}
-            }
-        },
-        {
-            header = Lang:t('evidence.examine_menu_blood_h'),
-            txt = Lang:t('evidence.examine_menu_blood_b'),
-            icon = 'fa-solid fa-droplet',
-            params = {
-                event = 'police:client:SelectEvidence',
-                args = {
-		            type = 'blood',
-                    label = 'Blood',
-                    icon = 'fa-solid fa-droplet'
-                }
-            }
-        },
-        {
-            header = Lang:t('evidence.examine_menu_casing_h'),
-            txt = Lang:t('evidence.examine_menu_casing_b'),
-            icon = 'fa-solid fa-joint',
-            params = {
-                event = 'police:client:SelectEvidence',
-                args = {
-		            type = 'casing',
-                    label = 'Bullet casing',
-                    icon = 'fa-solid fa-joint'
-                }
-            }
-        },
-        {
-            header = Lang:t('evidence.examine_menu_fingerprint_b'),
-            txt = Lang:t('evidence.examine_menu_fingerprint_h'),
-            icon = 'fa-solid fa-fingerprint',
-            params = {
-                event = 'police:client:SelectEvidence',
-                args = {
-		            type = 'fingerprint',
-                    label = 'Fingerprint',
-                    icon = 'fa-solid fa-fingerprint',
-                }
-            }
-        },
-        {
-            header = Lang:t('menu.close_x'),
-            icon = 'fa-solid fa-xmark'
-        }
-    })
+    local FindEvidence = {}
+    FindEvidence[#FindEvidence+1] = {opthead = Lang:t('evidence.examine_menu_blood_h'), optdesc = Lang:t('evidence.examine_menu_blood_b'), opticon = 'droplet',
+        optparams = {
+            event = 'police:client:SelectEvidence',
+            args = {type = 'blood', label = 'Blood', icon = 'droplet'}
+        }}
+    FindEvidence[#FindEvidence+1] = {opthead = Lang:t('evidence.examine_menu_casing_h'), optdesc = Lang:t('evidence.examine_menu_casing_b'), opticon = 'joint',
+        optparams = {
+            event = 'police:client:SelectEvidence',
+            args = {type = 'casing', label = 'Bullet casing', icon = 'joint'}
+        }}
+    FindEvidence[#FindEvidence+1] = {opthead = Lang:t('evidence.examine_menu_fingerprint_b'),optdesc = Lang:t('evidence.examine_menu_fingerprint_h'), opticon = 'fingerprint',
+        optparams = {
+            event = 'police:client:SelectEvidence',
+            args = {type = 'fingerprint', label = 'Fingerprint', icon = 'fingerprint',}
+        }}
+    FindEvidence[#FindEvidence+1] = {opthead = Lang:t('menu.close_x'), opticon = 'xmark', optparams = {event = ''}}
+
+    local header = {
+        disabled = true,
+        header = PlayerData.job.label,
+        headerid = 'police_evidencebags_menu', -- unique
+        desc = '',
+        icon = 'microscope'
+    }
+    ContextSystem.Open(header, FindEvidence)
 end)
 
 RegisterNetEvent('police:client:SelectEvidence', function(Data)
@@ -282,30 +253,25 @@ RegisterNetEvent('police:client:SelectEvidence', function(Data)
         if List == nil then
             QBCore.Functions.Notify(Lang:t('error.dont_have_evidence_bag'), 'error')
         else
-            local EvidenceBagsMenu = {{
-                header = Data.label..' evidences',
-                icon = Data.icon,
-                isMenuHeader = true
-            }}
+            local EvidenceBagsMenu = {}
 
             for _, n in pairs(List) do
-                EvidenceBagsMenu[#EvidenceBagsMenu+1] = {
-                    header = n.label,
-                    txt = Lang:t('info.select_for_examine_b', {street = n.info.street, label= n.info.label, slot=n.slot}),
-                    params  = {
+                EvidenceBagsMenu[#EvidenceBagsMenu+1] = {opthead = n.label, optdesc = Lang:t('info.select_for_examine_b', {street = n.info.street, label= n.info.label, slot=n.slot}),
+                    optparams  = {
                         event = 'police:client:ExamineEvidenceBag',
-                        args = {
-                            Item = n,
-                            slot = n.slot
-                        }
-                    }
-                }
+                        args = {Item = n,slot = n.slot}
+                    }}
             end
 
-            EvidenceBagsMenu[#EvidenceBagsMenu+1] = {
-                header = Lang:t('menu.close_x'),
-                icon = 'fa-solid fa-xmark'
-            } exports['qb-menu']:openMenu(EvidenceBagsMenu)
+            EvidenceBagsMenu[#EvidenceBagsMenu+1] = {opthead = Lang:t('menu.close_x'),opticon = 'fa-solid fa-xmark', optparams= {event=''}}
+            local header = {
+                disabled = true,
+                header = Data.label..' evidences',
+                headerid = 'police_evidencebags_menu', -- unique
+                desc = '',
+                icon = Data.icon
+            }
+            ContextSystem.Open(header, EvidenceBagsMenu)
         end
     end, Data.type)
 end)
