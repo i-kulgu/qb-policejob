@@ -1,4 +1,4 @@
-# Warning : new version is available from tebex : https://i-kulgu.tebex.io/
+# Warning : new version is available for FREE from tebex : https://i-kulgu.tebex.io/
 
 # qb-policejob
 Police Job for QB-Core Framework :police_officer:
