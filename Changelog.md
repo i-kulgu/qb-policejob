@@ -72,3 +72,8 @@ v1.3.9
 - Added version checker
 - Fixed police impound menu not showing for other jobs then LEO
 - Fixed tow menu not showing because of error
+
+v.1.4.0
+- Added ox_inventory support
+- Removed leftover debug and prints
+- Fixed evidence status 'unknown' to language
