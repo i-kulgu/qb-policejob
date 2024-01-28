@@ -77,3 +77,9 @@ v.1.4.0
 - Added ox_inventory support
 - Removed leftover debug and prints
 - Fixed evidence status 'unknown' to language
+
+v.1.4.1
+- Added quick equip option for armoury
+- Moved phrases to language file
+- Fixed ps-ui not working from config
+- Addes ox_lib for skillcheck
