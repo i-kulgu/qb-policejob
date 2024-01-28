@@ -55,6 +55,8 @@ See Changelog.md file.
 
 
 - Update the filled evidence bag in your qb-inventory/html/js/app.js
+
+OLD :
 ```
 else if (itemData.name == "filled_evidence_bag") {
     $(".item-info-title").html("<p>" + itemData.label + "</p>");
@@ -133,6 +135,64 @@ else if (itemData.name == "filled_evidence_bag") {
             }
         }
     }
+```
+
+NEW: 
+```
+        case "filled_evidence_bag":
+            if (itemData.info.type == "casing") {
+                if (itemData.info.evidenceNote != null) {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>Type number: </strong><span>${itemData.info.ammotype}</span></p>
+                    <p><strong>Caliber: </strong><span>${itemData.info.ammolabel}</span></p>
+                    <p><strong>Serial Number: </strong><span>${itemData.info.serie}</span></p>
+                    <p><strong>Crime scene: </strong><span>${itemData.info.street}</span></p>
+                    <p><strong>Note Writer: </strong><span>${itemData.info.noteWrite}</span></p>
+                    <p><strong>Note: </strong><span>${itemData.info.evidenceNote}</span></p>`;
+                } else {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>Type number: </strong><span>${itemData.info.ammotype}</span></p>
+                    <p><strong>Caliber: </strong><span>${itemData.info.ammolabel}</span></p>
+                    <p><strong>Serial Number: </strong><span>${itemData.info.serie}</span></p>
+                    <p><strong>Crime scene: </strong><span>${itemData.info.street}</span></p><br /><p>${itemData.description}</p>`;
+                }
+            } else if (itemData.info.type == "blood") {
+                if (itemData.info.evidenceNote != null) {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>Blood type: </strong><span>${itemData.info.bloodtype}</span></p>
+                    <p><strong>DNA Code: </strong><span>${itemData.info.dnalabel}</span></p>
+                    <p><strong>Crime scene: </strong><span>${itemData.info.street}</span></p>
+                    <p><strong>Note Writer: </strong><span>${itemData.info.noteWrite}</span></p>
+                    <p><strong>Note: </strong><span>${itemData.info.evidenceNote}</span></p>`;
+                } else {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>Blood type: </strong><span>${itemData.info.bloodtype}</span></p>
+                    <p><strong>DNA Code: </strong><span>${itemData.info.dnalabel}</span></p>
+                    <p><strong>Crime scene: </strong><span>${itemData.info.street}</span></p><br /><p>${itemData.description}</p>`;
+                }
+            } else if (itemData.info.type == "fingerprint") {
+                if (itemData.info.evidenceNote != null) {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>Fingerprint: </strong><span>${itemData.info.fingerprint}</span></p>
+                    <p><strong>Crime Scene: </strong><span>${itemData.info.street}</span></p><br />
+                    <p><strong>Note Writer: </strong><span>${itemData.info.noteWrite}</span></p>
+                    <p><strong>Note: </strong><span>${itemData.info.evidenceNote}</span></p>`;
+                } else {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>Fingerprint: </strong><span>${itemData.info.fingerprint}</span></p>
+                    <p><strong>Crime Scene: </strong><span>${itemData.info.street}</span></p><br /><p>${itemData.description}</p>`;
+                }
+            } else if (itemData.info.type == "dna") {
+                if (itemData.info.evidenceNote != null) {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>DNA Code: </strong><span>${itemData.info.dnalabel}</span></p>
+                    <p><strong>Note Writer: </strong><span>${itemData.info.noteWrite}</span></p>
+                    <p><strong>Note: </strong><span>${itemData.info.evidenceNote}</span></p>`;
+                } else {
+                    return `<p><strong>Evidence material: </strong><span>${itemData.info.label}</span></p>
+                    <p><strong>DNA Code: </strong><span>${itemData.info.dnalabel}</span></p><br /><p>${itemData.description}</p>`;
+                }
+            }
 ```
 
 ## Dependencies
