@@ -100,6 +100,7 @@ v1.4.2
 v1.4.3
 - Fixed the issue with weapon repair in ox_inventory
 - Added object spawner menu
+	- command : /objectmenu
 	- language added objmenu and sub languages (en.lua 231 - 239)
 - Added bridge for progressbar
 	- config.lua - Config.ProgressBar option
