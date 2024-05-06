@@ -83,3 +83,25 @@ v.1.4.1
 - Moved phrases to language file
 - Fixed ps-ui not working from config
 - Addes ox_lib for skillcheck
+
+v1.4.2
+- Added cooldown for cuff spamming
+	- config.lua - Config.CuffCooldown option
+- Added option for disabling running and jumping while escorting
+	- config.lua - Config.DisableSprintJump option
+- Fixed the problem with ox_inventory not opening when uncuffed or boltcutter used
+	- See readme for instructions to change an event in ox_inventory/modules/bridge/qb/client.lua
+- Fixed the price in submenu for taking vehicles
+- Added option to spawn multiple helicopters like vehicle garage
+	- language added : info.heli_plate
+- Added functionality for breatheanalyzer (Thnx @semfx for UI fix)
+	- Added alcoholmeter item
+
+v1.4.3
+- Fixed the issue with weapon repair in ox_inventory
+- Added object spawner menu
+	- language added objmenu and sub languages (en.lua 231 - 239)
+- Added bridge for progressbar
+	- config.lua - Config.ProgressBar option
+- Added bridge for DrawText
+	config.lua - Config.DrawText
