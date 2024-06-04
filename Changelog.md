@@ -106,3 +106,35 @@ v1.4.3
 	- config.lua - Config.ProgressBar option
 - Added bridge for DrawText
 	config.lua - Config.DrawText
+
+v1.4.4
+- Fixed an issue when placing a prop with object menu that you can't pick it up with qb-target
+	- objects.lua : 137 - 138
+- Changed alcohol event to add or remove alcohol promille
+	- config.lua - Config.AlcoholReleaseInterval option
+	- Use the next trigger to add or remove promille : 
+		-- This will add between 0.01 and 0.04 promille alcohol to the user
+		TriggerServerEvent('police:server:UpdateAlcohol', (math.random(1,4)/100), 'add')
+- Code cleanup and removed forgotten debugs
+- Fixed heli cam not working while in police helicopter
+- Added a config option to enable or disable the version checking
+	- config.lua - Config.EnableVersionCheck
+
+v1.5.0
+- Added config option for new qb-inventory
+	- Config.Inventory = 'new-qb-inventory'
+- Fixed repair ped not working after server restart
+- Removed debug print of weapon data
+- Fixed issue with drawtext and evidence not working
+- Fixed issue policetrash not removing items when restarting script
+- Fixed Armoury not opening with new qb-inventory
+- Fixed version checking not working (gsub error)
+- Code cleanup not used events
+- Fixed bug with synced walking if the dragged player is dead or in last stand
+- Stopping escorting if the escorting officier is dead
+- Added config option to set repair ped as public or bound to a jobtype
+	- Config.RepairStations.locations.jobtype
+- Moved phrases in repair ped to locales file
+	- target.repairweapon
+	- target.takeback
+- Fixed taking helicopter with drawtext option
