@@ -138,3 +138,6 @@ v1.5.0
 	- target.repairweapon
 	- target.takeback
 - Fixed taking helicopter with drawtext option
+
+v1.5.1 (hotfix)
+- Fixed cuffed player being kicked when cuffing
