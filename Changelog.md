@@ -141,3 +141,13 @@ v1.5.0
 
 v1.5.1 (hotfix)
 - Fixed cuffed player being kicked when cuffing
+	- Changed server\main.lua event : police:server:AddRemove
+
+v.1.5.2
+- Fixed weapon repair not working with new inventory
+- Fixed repair ped not giving weapon back with public repair stations
+- Police vehicles are optionally owned now so you can store it in garage
+	- Added new phrase : en.lua - success.purchased
+	- Config.OwnedPoliceCars
+- Changed gps name from leo-gps to leo_gps to prevent errors with new items formatting
+- Added polyzone support for evidence labs
