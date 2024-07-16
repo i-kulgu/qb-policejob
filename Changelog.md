@@ -151,3 +151,14 @@ v.1.5.2
 	- Config.OwnedPoliceCars
 - Changed gps name from leo-gps to leo_gps to prevent errors with new items formatting
 - Added polyzone support for evidence labs
+
+
+v1.5.3
+- Fixed the issue with impound where cars didn't get the properties
+- Fixed police garage when chosen owned cars there was a problem with setting plate numbers
+- Added support for qb-minigames for breakout minigame
+	- Added : Config.SkillbarConfig
+- Fixed issue when cuffing player it didn't gave keys
+- Fixed searching player issue
+	- Added a check that the player must be cuffed to be able to search a player
+- Fixed return garage vehicle logic when trying to return a vehicle with drawtext
