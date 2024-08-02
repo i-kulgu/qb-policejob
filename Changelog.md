@@ -162,3 +162,19 @@ v1.5.3
 - Fixed searching player issue
 	- Added a check that the player must be cuffed to be able to search a player
 - Fixed return garage vehicle logic when trying to return a vehicle with drawtext
+
+v1.6.0
+- Added speed / anpr camera's, selectable from /objectmenu
+	- new prop downloadable from keymaster : hd-speedcam
+	- Config.Radars changed
+	- Added Config.UseMPH to use MPH or KMph as metric for speed cams
+	- Added modules/cl_radar and modules/sv_radar files
+- Added mobile fingerprint scanner
+	- Config.FPItem = the item name of your fingerprint scanner
+	- Added modules/cl_fpscanner and modules/sv_fpscanner files
+	- New item : fp_scanner added (image in images folder)
+	- New item : fp_document added (image in images folder)
+- New notification bridge
+	- Supports : qb_notify / okok_notify / ox_lib / custom_notify
+	- Added bridge/notify.lua
+- Added support for qs-inventory
