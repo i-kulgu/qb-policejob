@@ -174,6 +174,7 @@ v1.6.0
 	- Added modules/cl_fpscanner and modules/sv_fpscanner files
 	- New item : fp_scanner added (image in images folder)
 	- New item : fp_document added (image in images folder)
+	- New file : locales/ui.json
 - New notification bridge
 	- Supports : qb_notify / okok_notify / ox_lib / custom_notify
 	- Added bridge/notify.lua
