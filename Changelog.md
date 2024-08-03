@@ -179,3 +179,14 @@ v1.6.0
 	- Supports : qb_notify / okok_notify / ox_lib / custom_notify
 	- Added bridge/notify.lua
 - Added support for qs-inventory
+
+v1.6.1
+
+- Made stashes and inventories configurable, the settings will be taken over from Config.StashSettings
+- Fixed an issue where it gave an error for removing radars
+- Fixed the issue with spawning multiple peds when restarting script
+- Made using of radars configurable
+	- Config.UseRadars
+- Added spikestrips to /objectmenu
+- Changed spawn object rotation from arrow keys to mousewheel up/down
+- Fixed the issue with quick equip not giving items
