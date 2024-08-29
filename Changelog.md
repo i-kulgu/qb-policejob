@@ -190,3 +190,20 @@ v1.6.1
 - Added spikestrips to /objectmenu
 - Changed spawn object rotation from arrow keys to mousewheel up/down
 - Fixed the issue with quick equip not giving items
+
+v1.6.2
+
+- Fixed an issue with spawning spike strips with objectmenu
+- Added support for custom systems :
+	- custom.lua file added
+	- context, input and drawtext systems added with explanation of incoming data
+	- added support for custom target names that are equivalent to qb-target which uses : AddBoxZone / AddTargetBone / AddGlobalPlayer / AddTargetModel / AddTargetEntity
+- Fixed command /cuff not cuffing
+- Fixed an issue with fingerprint scanner where the other player sees old info and could close the screen
+- Fixed the holding animation not playing correctly on the escorting player
+- Fixed double target option when placing spikes from objectmenu
+- Added job menu
+	- Config.Objects added : slowtraffic and stoptraffic objects
+	- Config option added for key binding the jobmenu : Config.OpenJobMenu 
+	- language added : polmenu
+	- file added : client/jobmenu.lua
