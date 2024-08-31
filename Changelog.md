@@ -207,3 +207,21 @@ v1.6.2
 	- Config option added for key binding the jobmenu : Config.OpenJobMenu 
 	- language added : polmenu
 	- file added : client/jobmenu.lua
+
+v1.6.3
+
+- QBox support added 
+	- Config option : Config.Framework
+	- bridge/framework.lua file added
+- Config.FuelSystem removed. Added native fuel setter and getters to work with every fuel system.
+- Added vehicle key system supporting : qb / qbx / qs / cd_garage / other (others that use the event vehiclekeys:client:SetOwner)
+- Moved qb-inputs to the bridge
+- Moved all client and server notify messages to bridge
+	- language added : notifyheaders
+- Fixed an issue with ox_target not able to pickup spike strips
+- Fixed an issue where the garage menu shows returning of a vehicle insted of new vehicle list when ownedvehicles are enabled
+- Fixed impound issues with ox_lib when using drawtext
+- Fixed takedna command with ox_inventory
+- Fixed mobile fingerprint scanner opening while nobody is nearby and getting stuck
+- Fixed an issue where the escorting animation hangs when you put someone in vehicle
+- Added check to jobmenu where only leo can open it
