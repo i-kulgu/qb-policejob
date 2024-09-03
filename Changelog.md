@@ -225,3 +225,12 @@ v1.6.3
 - Fixed mobile fingerprint scanner opening while nobody is nearby and getting stuck
 - Fixed an issue where the escorting animation hangs when you put someone in vehicle
 - Added check to jobmenu where only leo can open it
+
+v1.6.4
+
+- Fixed an issue with searching players
+- Moved some QBCore functions to bridge to be compatible with QBox
+	- Added : bridge/framework.lua and server/framework.lua
+- Fixed an issue with /takedna command
+- Fixed an issue with ox_inventory not showing meta data on items after ensuring script
+- Fixed jailing player issue where you couldn't send player to jail
