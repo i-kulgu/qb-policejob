@@ -234,3 +234,24 @@ v1.6.4
 - Fixed an issue with /takedna command
 - Fixed an issue with ox_inventory not showing meta data on items after ensuring script
 - Fixed jailing player issue where you couldn't send player to jail
+
+v1.6.5
+
+- New feature bodycam added
+	- added bodycam prop to hd-speedcam, download and update from your keymaster
+	- added new item : bodycam (item image in images folder)
+	- added bodycam item to armoury
+	- new command : bcmenu , this shows active bodycams list
+	- added files modules\cl_bodycam and modules\sv_bodycam
+	- changed fxmanifest.lua file
+- Added ziptie to armoury items
+- Fixed slot issue in config armoury items for item 19 where slot was still 18
+- Added support for new ps-inventory with new event names
+	- don't forget to update your ps-inventory with new event names
+- Added Custom.Notify into custom.lua file
+- Fixed issue with qs-inventory not able to search other player
+- Fixed an issue with jail time not getting the input amount
+- Changed inventory images with better ones (thnx @semfx)
+	- Change your images in your inventory with the new ones in hd-policejob\images folder
+- Added option to uncuff without cuffkey items
+	- set usekeytouncuff in Config.CuffItems to false to be able to uncuff with the same item
