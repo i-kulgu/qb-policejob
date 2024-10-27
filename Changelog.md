@@ -255,3 +255,24 @@ v1.6.5
 	- Change your images in your inventory with the new ones in hd-policejob\images folder
 - Added option to uncuff without cuffkey items
 	- set usekeytouncuff in Config.CuffItems to false to be able to uncuff with the same item
+
+
+v1.6.6
+
+- New GPS UI system rewritten from scratch
+	- added client/gps.lua
+	- added server/gps.lua
+	- added strings in locales/en.lua and ui.json
+- Added option to set plate for temporary vehicles as CallSign number
+	- config option : Config.SetCSAsPlate
+- custom.lua was escrowed, it's open now
+- Radar system changes
+	- Added info drawtext while placing radar zone
+	- Option to remove the radar and zone with target
+- Added tgiann-inventory support
+- Fixed issue with bodycam attaching to wrong bodypart
+- Fixed issue with robplayer not working in new qb-inventory
+- Fixed an issue with escorting animation playing when the player nearby is not handcuffed or dead
+- Added trunk items feature to new-qb-inventory
+	- There is an error on the current inventory, i have sended a PR for this: https://github.com/qbcore-framework/qb-inventory/pull/592
+	Please add comments to the PR so it will get merged for future use
