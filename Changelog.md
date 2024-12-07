@@ -276,3 +276,28 @@ v1.6.6
 - Added trunk items feature to new-qb-inventory
 	- There is an error on the current inventory, i have sended a PR for this: https://github.com/qbcore-framework/qb-inventory/pull/592
 	Please add comments to the PR so it will get merged for future use
+
+1.6.7
+
+- Removed command : objmenu. You can start objectmenu from jobmenu [F6]
+- Added lab support for new-qb-inventory
+	- Read the documentation ( https://hi-dev.gitbook.io/hi-dev-docs/documentation/hd-policejob/new-qb-inventory )
+- Added recording and playing of bodycams
+	- Command : bcrecord
+	- Added webhooks on top of server\main.lua
+	- System will automatically create table in database : hd_bcrecords
+	- From F6 menu you can play, remove recordings
+	- Added Config.CamRecordOpt for recording options
+- Fixed issue with repair peds not always showing
+	- Spawning repairpeds from server side
+	- Suppressed the warnings for GetNetworkEntity
+- Added option to change clip scale 
+	- Added Config.Blip option
+- Fixed the issue with gps not removing when player quits
+- Fixed issue with lab not showing evidence bags for multiple inventory systems
+- Fixed an issue with escorting animation while the player is dead or in last stand
+- Fixed other player inventory not opening with codem-inventory
+- Fixed custom vehiclekeys was not triggering the function from custom.lua
+- Fixed an issue when putting player out of vehicle
+- Fixed an issue with UI not getting the translations
+- Updated all language files with missing phrases (not translated)
