@@ -277,7 +277,7 @@ v1.6.6
 	- There is an error on the current inventory, i have sended a PR for this: https://github.com/qbcore-framework/qb-inventory/pull/592
 	Please add comments to the PR so it will get merged for future use
 
-1.6.7
+v1.6.7
 
 - Removed command : objmenu. You can start objectmenu from jobmenu [F6]
 - Added lab support for new-qb-inventory
@@ -301,3 +301,20 @@ v1.6.6
 - Fixed an issue when putting player out of vehicle
 - Fixed an issue with UI not getting the translations
 - Updated all language files with missing phrases (not translated)
+
+v1.6.8
+
+- Replaced deprecated qb-management addmoney exports with qb-banking
+- Fixed an issue with garage not giving owned vehicle when price is 0
+- Fixed an issue with evidence stashes not opening when too close to eachother
+- Fixed an issue with weapon repair for ox_inventory, ped was taking gun but not repairing and giving back
+- Fixed an issue that active blips were not removed when player quits
+- Added Config.GPS.waittime to be able to configure refresh times
+- Fixed an issue with ox_inventory not giving trunk items
+- Added back buttons for F6 JobMenu items
+- Added put in and take out of vehicle into F6 JobMenu
+- Added option to view static cameras in F6 JobMenu
+- Fixed an issue with opening inventory while handcuffed
+- Fixed double header title in ox_lib
+- Added GSR testing option in F6 jobmenu
+- Changed Config.Locations['vehspawn'] where you can add multiple spawn locations for 1 department
