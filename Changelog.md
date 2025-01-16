@@ -318,3 +318,15 @@ v1.6.8
 - Fixed double header title in ox_lib
 - Added GSR testing option in F6 jobmenu
 - Changed Config.Locations['vehspawn'] where you can add multiple spawn locations for 1 department
+
+ v1.6.9
+
+- Fixed an issue with trunk items not working
+- Fixed an error with GPS when player dropped
+- Fixed an issue with garage not returning cars when using qbcore + ox_inventory
+- Changeg the robplayer logic, it is opening the other inventory now
+- Garage is now divided into job names and different trunk items for different cars
+	- Inside Config.Locations['vehicle'] you have the option : job = 'police' etc.
+	- Inside Config.AuthorizedVehicles added the option : trunk = 'default' etc. for the trunk items
+	- Config.CarItems divided into different trunk loadouts
+	- When you configure a vehicle with trunk = 'default' it will set the trunkitems to Config.CarItems['default']
