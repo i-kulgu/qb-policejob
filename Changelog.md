@@ -330,3 +330,15 @@ v1.6.8
 	- Inside Config.AuthorizedVehicles added the option : trunk = 'default' etc. for the trunk items
 	- Config.CarItems divided into different trunk loadouts
 	- When you configure a vehicle with trunk = 'default' it will set the trunkitems to Config.CarItems['default']
+
+v1.7.0
+
+- Fixed issue with not able to open inventory or search other player when they are cuffed and uncuffed.
+- Added peds for armoury when you use target option
+	- changed Config.Locations['armoury']
+	- added loc = for locations and ped = for ped models
+- Fixed a bug when escorted player dies the player keeps walking while dead
+- Added flagging and unflagging plates in jobmenu under traffic menu
+- Fixed static camera not showing from jobmenu and giving error that camera doesn't exist
+- Removed unused and moved commands from server/main.lua
+- Code cleanup from unused events
