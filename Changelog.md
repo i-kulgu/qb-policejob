@@ -342,3 +342,13 @@ v1.7.0
 - Fixed static camera not showing from jobmenu and giving error that camera doesn't exist
 - Removed unused and moved commands from server/main.lua
 - Code cleanup from unused events
+
+v1.7.1
+
+- Fixed issue with armoury where the vector for polyzone was not found
+- Fixed an issue with codem-inventory not opening police trash bin
+- Added a check if the player is uncuffing while escorting, it will de-escort first
+- Fixed an issue with helicopters not spawning when you have enabled ownedcars
+- Added armoury shop for codem-inventory
+- Moved all progressbar actions to bridge
+- Added AK47 inventory support
