@@ -352,3 +352,15 @@ v1.7.1
 - Added armoury shop for codem-inventory
 - Moved all progressbar actions to bridge
 - Added AK47 inventory support
+
+v1.7.2
+
+- Fixed warning in js file while recording
+- Made armoury ped optional
+	- Changed Config.Locations[armoury] and added useped = bool
+- Players can't open inventory in ox_inventory while cuffed
+- Added support for tgiann-inventory to open shop
+- Fixed an notification error on bodycam when player was not found
+- Added option for GPS to show name after callsign
+	- Config.GPS.showname , if true it will show officier name
+- Fixed issue that GPS was still useable while config option was false
