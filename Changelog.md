@@ -364,3 +364,12 @@ v1.7.2
 - Added option for GPS to show name after callsign
 	- Config.GPS.showname , if true it will show officier name
 - Fixed issue that GPS was still useable while config option was false
+
+v1.7.3
+
+- Fixed issue with flagged plates not working correctly
+- Secured fingerprint events
+- Fixed an issue with tgiann-inventory kicking when opening shop
+- Code cleanup
+- Added logging
+	- Edit server/logs.lua file for webhooks
