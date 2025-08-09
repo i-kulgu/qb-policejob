@@ -373,3 +373,18 @@ v1.7.3
 - Code cleanup
 - Added logging
 	- Edit server/logs.lua file for webhooks
+
+v1.7.4
+
+- Fixed issue with impound and depot vehicle
+	- commands for impound and depot has been removed
+	- added tow vehicle inside polmenu -> actions -> Tow Vehicle
+- Code improvements for repair peds
+- Fixed an issue with bodycam giving error that not a correct event is sended
+- Fixed an issue with rob player as civilian
+	- added language phrase in error : handsup = 'The hands are not up or cuffed!'
+- Fixed codem-inventory issues
+	- police trash error when trying to clear
+	- Armoury shop not opening
+- GPS is made configurable for multiple jobs
+	- Added Config.GPSEnabledJobs, you can add here any jobtype you want them to use GPS and add colors in Config.BlipColors
