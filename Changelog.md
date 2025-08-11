@@ -388,3 +388,15 @@ v1.7.4
 	- Armoury shop not opening
 - GPS is made configurable for multiple jobs
 	- Added Config.GPSEnabledJobs, you can add here any jobtype you want them to use GPS and add colors in Config.BlipColors
+
+v1.8.0
+
+- Changed location of config file to shared/config
+- Changed garage menu
+	- Added garages.lua inside shared folder where you can setup your garages
+	- Garage related config items moved to shared/garages.lua file
+	- UI changes
+		- Changed index.html
+		- Changed main.css
+		- Changed script.js
+- Removed unused code
