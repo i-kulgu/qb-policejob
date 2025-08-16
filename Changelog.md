@@ -400,3 +400,13 @@ v1.8.0
 		- Changed main.css
 		- Changed script.js
 - Removed unused code
+
+v1.8.1
+
+- Fixed an issue while getting in a vehicle gives the error : attempt to get length of a nil value (field 'PoliceHelicopters')
+- Removed a debug print for creating repair peds
+- GPS optimizations : server and client side
+	- Added Config.BlipSprite where you can setup your own blip sprites
+- Changed aremoury logic
+	- Added job names and grades per job so you can configure items based on job names and grades
+	- There is a fallback for the old configs so you don't need to change the items when you don't want to use this.
